@@ -18,11 +18,9 @@ datasource db {
 model User {
   id           String    @id @default(uuid())
   email        String    @unique
-  username     String    @unique
+  nickName     String    @unique
   password     String
-  name         String
   introduction String?
-  isActive     Boolean   @default(true)
   deletedAt    DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt

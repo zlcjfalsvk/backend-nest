@@ -2,11 +2,9 @@
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    "username" TEXT NOT NULL,
+    "nickName" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
     "introduction" TEXT,
-    "isActive" BOOLEAN NOT NULL DEFAULT true,
     "deletedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -47,7 +45,7 @@ CREATE TABLE "comments" (
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "users_username_key" ON "users"("username");
+CREATE UNIQUE INDEX "users_nickName_key" ON "users"("nickName");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "posts_slug_key" ON "posts"("slug");
