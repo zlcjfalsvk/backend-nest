@@ -21,9 +21,6 @@
       "@libs/business": [
         "libs/business/src"
       ],
-      "@libs/business/*": [
-        "libs/business/src/*"
-      ],
       "@prisma-client/*": [
         "prisma/prisma-clients/*"
       ]

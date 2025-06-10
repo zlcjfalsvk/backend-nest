@@ -43,6 +43,11 @@ export default tseslint.config(
               group: 'external',
               position: 'after',
             },
+            {
+              pattern: '@libs/**',
+              group: 'external',
+              position: 'after',
+            },
           ],
           alphabetize: {
             order: 'asc',
