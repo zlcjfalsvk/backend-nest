@@ -7,7 +7,9 @@
   "license": "UNLICENSED",
   "scripts": {
     "api:start": "nest start  --debug --watch",
-    "api:start:prod": "npm run build && node dist/apps/be-layered-example/main"
+    "api:start:prod": "npm run build && node dist/apps/be-layered-example/main",
+    "prisma:generate": "prisma generate",
+    "prisma:script": "prisma migrate dev --create-only"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
