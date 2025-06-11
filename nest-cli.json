@@ -27,6 +27,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/business/tsconfig.lib.json"
       }
+    },
+    "infrastructure": {
+      "type": "library",
+      "root": "libs/infrastructure",
+      "entryFile": "index",
+      "sourceRoot": "libs/infrastructure/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/infrastructure/tsconfig.lib.json"
+      }
     }
   }
 }

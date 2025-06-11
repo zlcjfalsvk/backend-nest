@@ -72,7 +72,8 @@
       "<rootDir>/libs/"
     ],
     "moduleNameMapper": {
-      "^@libs/business(|/.*)$": "<rootDir>/libs/business/src/$1"
+      "^@libs/business(|/.*)$": "<rootDir>/libs/business/src/$1",
+      "^@libs/infrastructure(|/.*)$": "<rootDir>/libs/infrastructure/src/$1"
     }
   }
 }
