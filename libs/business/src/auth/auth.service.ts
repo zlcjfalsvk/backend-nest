@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
+import * as argon2 from 'argon2';
 
 import { PrismaService } from '@libs/infrastructure';
 
@@ -14,18 +15,41 @@ export class AuthService {
   constructor(private readonly prisma: PrismaService) {}
 
   async signUp(param: SignUpType): Promise<SignUpResponseType> {
-    // This is a placeholder implementation
-    // Using param to avoid unused variable warning
-    const { email, nickName } = param;
+    // 1. 단일 쿼리로 중복 체크
+    const existingUser = await this.prisma.user.findFirst({
+      where: {
+        OR: [{ email: param.email }, { nickName: param.nickName }],
+      },
+      select: {
+        email: true,
+        nickName: true,
+      },
+    });
 
-    // Adding await to satisfy ESLint require-await rule
-    await Promise.resolve();
+    // 2. 중복 검사
+    if (existingUser) {
+      if (existingUser.email === param.email) {
+        throw new ConflictException('Email already exists');
+      }
+      if (existingUser.nickName === param.nickName) {
+        throw new ConflictException('Nickname already exists');
+      }
+    }
 
-    return {
-      id: '1',
-      email,
-      nickName,
-    } as SignUpResponseType;
+    // 3. 비밀번호 해싱
+    // 주의. 한국에서 서비스할 때는 argon2 사용못함 => KISA 표준 목록에 없기 때문에 pbkdf2-sha256 사용 해야 함
+    const hashedPassword = await argon2.hash(param.password);
+
+    // 4. 사용자 생성 (비밀번호 제외하고 반환)
+    return this.prisma.user.create({
+      data: {
+        ...param,
+        password: hashedPassword,
+      },
+      omit: {
+        password: true,
+      },
+    });
   }
 
   async signIn(param: SignInType): Promise<SignInResponseType> {
