@@ -9,7 +9,8 @@
     "api:start": "nest start  --debug --watch",
     "api:start:prod": "npm run build && node dist/apps/be-layered-example/main",
     "prisma:generate": "prisma generate",
-    "prisma:script": "prisma migrate dev --create-only"
+    "prisma:script": "prisma migrate dev --create-only",
+    "test:unit": "jest"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -40,6 +41,7 @@
     "eslint-plugin-prettier": "^5.2.2",
     "globals": "^16.0.0",
     "jest": "^29.7.0",
+    "jest-mock-extended": "^4.0.0-beta1",
     "prettier": "^3.4.2",
     "prisma": "^6.9.0",
     "source-map-support": "^0.5.21",
@@ -50,30 +52,5 @@
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": ".",
-    "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
-    "coverageDirectory": "./coverage",
-    "testEnvironment": "node",
-    "roots": [
-      "<rootDir>/apps/",
-      "<rootDir>/libs/"
-    ],
-    "moduleNameMapper": {
-      "^@libs/business(|/.*)$": "<rootDir>/libs/business/src/$1",
-      "^@libs/infrastructure(|/.*)$": "<rootDir>/libs/infrastructure/src/$1"
-    }
   }
 }
