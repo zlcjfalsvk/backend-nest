@@ -46,7 +46,6 @@ describe('AuthService', () => {
       email: 'test@example.com',
       nickName: 'testuser',
       password: 'password123!#@#',
-      name: 'Test User',
       introduction: 'Hello, I am a test user',
     };
 
@@ -55,7 +54,6 @@ describe('AuthService', () => {
       email: mockSignUpData.email,
       nickName: mockSignUpData.nickName,
       password: mockSignUpData.password,
-      name: mockSignUpData.name,
       introduction: mockSignUpData.introduction || null,
       deletedAt: null,
       createdAt: new Date(),
@@ -83,7 +81,7 @@ describe('AuthService', () => {
       expect(prismaService.user.create.mock.calls.length).toBeGreaterThan(0);
     });
 
-    it('정상적인 회원가입 이후 password 를 제외한 User Data 가 반환 된다', async () => {
+    it('정상적인 회원가입 이후 deletedAt, password 를 제외한 User Data 가 반환 된다', async () => {
       prismaService.user.findFirst.mockResolvedValue(null);
 
       const userWithoutPassword: SignUpResponseType = {
@@ -101,6 +99,7 @@ describe('AuthService', () => {
 
       expect(result).toEqual(userWithoutPassword);
       expect(result).not.toHaveProperty('password');
+      expect(result).not.toHaveProperty('deletedAt');
     });
 
     it('존재하는 Email 일 경우 회원가입 실패한다', async () => {

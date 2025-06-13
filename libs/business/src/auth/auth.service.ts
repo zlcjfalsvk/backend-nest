@@ -52,7 +52,7 @@ export class AuthService {
     // 주의. 한국에서 서비스할 때는 argon2 사용못함 => KISA 표준 목록에 없기 때문에 pbkdf2-sha256 사용 해야 함
     const hashedPassword = await argon2.hash(param.password);
 
-    // 4. 사용자 생성 (비밀번호 제외하고 반환)
+    // 4. 사용자 생성
     return this.prismaService.user.create({
       data: {
         ...param,
@@ -60,6 +60,7 @@ export class AuthService {
       },
       omit: {
         password: true,
+        deletedAt: true,
       },
     });
   }
