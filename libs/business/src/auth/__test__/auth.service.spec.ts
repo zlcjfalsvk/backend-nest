@@ -91,7 +91,6 @@ describe('AuthService', () => {
         email: mockCreatedUser.email,
         nickName: mockCreatedUser.nickName,
         introduction: mockCreatedUser.introduction,
-        deletedAt: mockCreatedUser.deletedAt,
         createdAt: mockCreatedUser.createdAt,
         updatedAt: mockCreatedUser.updatedAt,
       };
