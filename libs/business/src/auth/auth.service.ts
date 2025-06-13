@@ -16,13 +16,13 @@ import {
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService,
   ) {}
 
   async signUp(param: SignUpType): Promise<SignUpResponseType> {
     // 1. 단일 쿼리로 중복 체크
-    const existingUser = await this.prisma.user.findFirst({
+    const existingUser = await this.prismaService.user.findFirst({
       where: {
         OR: [{ email: param.email }, { nickName: param.nickName }],
       },
@@ -53,7 +53,7 @@ export class AuthService {
     const hashedPassword = await argon2.hash(param.password);
 
     // 4. 사용자 생성 (비밀번호 제외하고 반환)
-    return this.prisma.user.create({
+    return this.prismaService.user.create({
       data: {
         ...param,
         password: hashedPassword,
@@ -66,7 +66,7 @@ export class AuthService {
 
   async signIn(param: SignInType): Promise<SignInResponseType> {
     // 1. 이메일로 사용자 찾기
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prismaService.user.findUnique({
       where: { email: param.email },
     });
 
