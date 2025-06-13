@@ -1,12 +1,9 @@
-import {
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 
 import { PrismaService } from '@libs/infrastructure';
+import { CustomError, ERROR_CODES } from '@libs/utils';
 
 import {
   SignInResponseType,
@@ -38,10 +35,16 @@ export class AuthService {
     // 2. 중복 검사
     if (existingUser) {
       if (existingUser.email === param.email) {
-        throw new ConflictException('Email already exists');
+        throw new CustomError(
+          ERROR_CODES.AUTH_CONFLICT,
+          'Email already exists',
+        );
       }
       if (existingUser.nickName === param.nickName) {
-        throw new ConflictException('Nickname already exists');
+        throw new CustomError(
+          ERROR_CODES.AUTH_CONFLICT,
+          'Nickname already exists',
+        );
       }
     }
 
@@ -69,13 +72,19 @@ export class AuthService {
 
     // 2. 사용자가 존재하지 않는 경우
     if (!user) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new CustomError(
+        ERROR_CODES.AUTH_UNAUTHORIZED,
+        'Invalid email or password',
+      );
     }
 
     // 3. 비밀번호 검증
     const isPasswordValid = await argon2.verify(user.password, param.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new CustomError(
+        ERROR_CODES.AUTH_UNAUTHORIZED,
+        'Invalid email or password',
+      );
     }
 
     // 4. JWT 토큰 생성

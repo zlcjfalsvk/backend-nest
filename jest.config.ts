@@ -7,6 +7,7 @@ const config: Config = {
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
+  setupFilesAfterEnv: ['<rootDir>/jest-setup.ts'],
   collectCoverageFrom: ['**/*.(t|j)s'],
   coverageDirectory: './coverage',
   testEnvironment: 'node',
@@ -15,6 +16,7 @@ const config: Config = {
     '^@libs/business(|/.*)$': '<rootDir>/libs/business/src/$1',
     '^@libs/infrastructure(|/.*)$': '<rootDir>/libs/infrastructure/src/$1',
     '^@prisma-client/client(|/.*)$': '<rootDir>/prisma/prisma-clients/$1',
+    '^@libs/utils(|/.*)$': '<rootDir>/libs/utils/src/$1',
   },
 };
 

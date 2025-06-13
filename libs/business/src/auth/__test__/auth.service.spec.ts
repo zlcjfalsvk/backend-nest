@@ -1,4 +1,3 @@
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as argon2 from 'argon2';
@@ -6,6 +5,7 @@ import { mockDeep, DeepMockProxy } from 'jest-mock-extended';
 
 import { AuthService } from '@libs/business';
 import { PrismaService } from '@libs/infrastructure';
+import { CustomError, ERROR_CODES } from '@libs/utils';
 
 import {
   SignInResponseType,
@@ -116,9 +116,16 @@ describe('AuthService', () => {
         updatedAt: new Date(),
       });
 
-      await expect(service.signUp(mockSignUpData)).rejects.toThrow(
-        new ConflictException('Email already exists'),
-      );
+      try {
+        await service.signUp(mockSignUpData);
+        fail('Expected CustomError to be thrown');
+      } catch (error) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error.code).toBe(ERROR_CODES.AUTH_CONFLICT);
+        expect(error.message).toBe('Email already exists');
+        expect(error.name).toBe('CustomError');
+      }
+
       expect(prismaService.user.create.mock.calls.length).toBe(0);
     });
 
@@ -134,9 +141,16 @@ describe('AuthService', () => {
         updatedAt: new Date(),
       });
 
-      await expect(service.signUp(mockSignUpData)).rejects.toThrow(
-        new ConflictException('Nickname already exists'),
-      );
+      try {
+        await service.signUp(mockSignUpData);
+        fail('Expected CustomError to be thrown');
+      } catch (error) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error.code).toBe(ERROR_CODES.AUTH_CONFLICT);
+        expect(error.message).toBe('Nickname already exists');
+        expect(error.name).toBe('CustomError');
+      }
+
       expect(prismaService.user.create.mock.calls.length).toBe(0);
     });
   });
@@ -194,9 +208,16 @@ describe('AuthService', () => {
       // Mock user not found
       prismaService.user.findUnique.mockResolvedValue(null);
 
-      await expect(service.signIn(mockSignInData)).rejects.toThrow(
-        new UnauthorizedException('Invalid email or password'),
-      );
+      try {
+        await service.signIn(mockSignInData);
+        fail('Expected CustomError to be thrown');
+      } catch (error) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error.code).toBe(ERROR_CODES.AUTH_UNAUTHORIZED);
+        expect(error.message).toBe('Invalid email or password');
+        expect(error.name).toBe('CustomError');
+      }
+
       expect(prismaService.user.findUnique).toHaveBeenCalledWith({
         where: { email: mockSignInData.email },
       });
@@ -209,9 +230,16 @@ describe('AuthService', () => {
       // Mock password verification to fail
       jest.spyOn(argon2, 'verify').mockResolvedValue(false);
 
-      await expect(service.signIn(mockSignInData)).rejects.toThrow(
-        new UnauthorizedException('Invalid email or password'),
-      );
+      try {
+        await service.signIn(mockSignInData);
+        fail('Expected CustomError to be thrown');
+      } catch (error) {
+        expect(error).toBeInstanceOf(CustomError);
+        expect(error.code).toBe(ERROR_CODES.AUTH_UNAUTHORIZED);
+        expect(error.message).toBe('Invalid email or password');
+        expect(error.name).toBe('CustomError');
+      }
+
       expect(prismaService.user.findUnique).toHaveBeenCalledWith({
         where: { email: mockSignInData.email },
       });
