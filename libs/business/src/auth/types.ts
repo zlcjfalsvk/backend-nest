@@ -19,6 +19,12 @@ export type SignInType = {
   password: string;
 };
 
-export type SignInResponseType = Pick<User, 'id' | 'email' | 'nickName'> & {
-  token: string;
+export type SignInResponseType = Pick<User, 'id'> & {
+  accessToken: string;
+  refreshToken: string;
 };
+
+export const TokenType = {
+  ACCESS_TOKEN: 'a',
+  REFRESH_TOKEN: 'r',
+} as const;

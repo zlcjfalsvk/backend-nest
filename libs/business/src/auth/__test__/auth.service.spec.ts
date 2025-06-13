@@ -1,28 +1,40 @@
-import { ConflictException } from '@nestjs/common';
+import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
+import * as argon2 from 'argon2';
 import { mockDeep, DeepMockProxy } from 'jest-mock-extended';
 
 import { AuthService } from '@libs/business';
 import { PrismaService } from '@libs/infrastructure';
 
-import { SignUpResponseType, SignUpType } from '../types';
+import {
+  SignInResponseType,
+  SignInType,
+  SignUpResponseType,
+  SignUpType,
+  TokenType,
+} from '../types';
 
 jest.mock('argon2', () => ({
   hash: jest.fn(),
+  verify: jest.fn(),
 }));
 
 describe('AuthService', () => {
   let service: AuthService;
   let prismaService: DeepMockProxy<PrismaService>;
+  let jwtService: DeepMockProxy<JwtService>;
 
   beforeEach(async () => {
     prismaService = mockDeep<PrismaService>();
+    jwtService = mockDeep<JwtService>();
 
     const module: TestingModule = await Test.createTestingModule({
       imports: [],
       providers: [
         AuthService,
         { provide: PrismaService, useValue: prismaService },
+        { provide: JwtService, useValue: jwtService },
       ],
     }).compile();
 
@@ -126,6 +138,87 @@ describe('AuthService', () => {
         new ConflictException('Nickname already exists'),
       );
       expect(prismaService.user.create.mock.calls.length).toBe(0);
+    });
+  });
+
+  describe('signIn', () => {
+    const mockSignInData: SignInType = {
+      email: 'test@example.com',
+      password: 'password123!#@#',
+    };
+
+    const mockUser = {
+      id: 'test-uuid',
+      email: mockSignInData.email,
+      nickName: 'testuser',
+      password: 'hashed-password',
+      introduction: 'Hello, I am a test user',
+      deletedAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    const mockSignInResponse: SignInResponseType = {
+      id: mockUser.id,
+      accessToken: 'mock-access-token',
+      refreshToken: 'mock-refresh-token',
+    };
+
+    it('존재하는 Email, Password 가 일치할 때 로그인이 성공한다', async () => {
+      // Mock the user find
+      prismaService.user.findUnique.mockResolvedValue(mockUser);
+
+      // Mock password verification
+      jest.spyOn(argon2, 'verify').mockResolvedValue(true);
+
+      // Mock JWT token generation
+      jwtService.sign.mockImplementation((payload: any) => {
+        return payload.type === TokenType.ACCESS_TOKEN
+          ? 'mock-access-token'
+          : 'mock-refresh-token';
+      });
+
+      const result = await service.signIn(mockSignInData);
+
+      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { email: mockSignInData.email },
+      });
+      expect(argon2.verify).toHaveBeenCalledWith(
+        mockUser.password,
+        mockSignInData.password,
+      );
+      expect(result).toEqual(mockSignInResponse);
+    });
+
+    it('Email 이 존재하지 않을시 에러를 반환한다', async () => {
+      // Mock user not found
+      prismaService.user.findUnique.mockResolvedValue(null);
+
+      await expect(service.signIn(mockSignInData)).rejects.toThrow(
+        new UnauthorizedException('Invalid email or password'),
+      );
+      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { email: mockSignInData.email },
+      });
+    });
+
+    it('Password가 일치하지 않을 시 에러를 반환한다', async () => {
+      // Mock user found but password doesn't match
+      prismaService.user.findUnique.mockResolvedValue(mockUser);
+
+      // Mock password verification to fail
+      jest.spyOn(argon2, 'verify').mockResolvedValue(false);
+
+      await expect(service.signIn(mockSignInData)).rejects.toThrow(
+        new UnauthorizedException('Invalid email or password'),
+      );
+      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { email: mockSignInData.email },
+      });
+      expect(argon2.verify).toHaveBeenCalledWith(
+        mockUser.password,
+        mockSignInData.password,
+      );
     });
   });
 });

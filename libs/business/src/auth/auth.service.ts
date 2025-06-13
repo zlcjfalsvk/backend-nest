@@ -1,4 +1,9 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 
 import { PrismaService } from '@libs/infrastructure';
@@ -8,11 +13,15 @@ import {
   SignInType,
   SignUpResponseType,
   SignUpType,
+  TokenType,
 } from './types';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   async signUp(param: SignUpType): Promise<SignUpResponseType> {
     // 1. 단일 쿼리로 중복 체크
@@ -53,15 +62,44 @@ export class AuthService {
   }
 
   async signIn(param: SignInType): Promise<SignInResponseType> {
-    // This is a placeholder implementation
-    // Adding await to satisfy ESLint require-await rule
-    await Promise.resolve();
+    // 1. 이메일로 사용자 찾기
+    const user = await this.prisma.user.findUnique({
+      where: { email: param.email },
+    });
 
+    // 2. 사용자가 존재하지 않는 경우
+    if (!user) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    // 3. 비밀번호 검증
+    const isPasswordValid = await argon2.verify(user.password, param.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    // 4. JWT 토큰 생성
+    const accessToken = this.jwtService.sign(
+      {
+        sub: user.id,
+        type: TokenType.ACCESS_TOKEN,
+      },
+      { expiresIn: '1h' },
+    );
+
+    const refreshToken = this.jwtService.sign(
+      {
+        sub: accessToken,
+        type: TokenType.REFRESH_TOKEN,
+      },
+      { expiresIn: '1h' },
+    );
+
+    // 5. 응답 반환
     return {
-      id: '1',
-      email: param.email,
-      nickName: 'user',
-      token: 'mock-token',
+      id: user.id,
+      accessToken,
+      refreshToken,
     };
   }
 }
