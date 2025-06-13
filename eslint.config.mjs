@@ -39,7 +39,7 @@ export default tseslint.config(
           groups: ['builtin', 'external', 'internal', 'type'],
           pathGroups: [
             {
-              pattern: '@prisma-client/**',
+              pattern: '@prisma-client',
               group: 'external',
               position: 'after',
             },

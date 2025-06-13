@@ -1,16 +1,16 @@
-import { Prisma, User } from '@prisma-client/index';
+import { Prisma, User } from '@prisma-client';
 
 export type SignUpType = {
   email: string;
   nickName: string;
   password: string;
-  name: string;
   introduction?: string;
 };
 
 export type SignUpResponseType = Prisma.UserGetPayload<{
   omit: {
     password: true;
+    deletedAt: true;
   };
 }>;
 
