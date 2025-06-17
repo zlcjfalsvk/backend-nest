@@ -17,13 +17,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-#          cache: 'npm'
+          node-version: '18'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: |
-          npm cache clean --force
-          npm install --frozen-lockfile
+        run: npm ci
 
       - name: Generate Prisma client
         run: npm run prisma:generate
