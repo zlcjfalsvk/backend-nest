@@ -22,13 +22,26 @@ jobs:
           check-latest: true
 
       - name: Upgrade npm
-        run: npm install -g npm@latest
+        run: npm install -g npm@9.8.1
 
-      - name: Clear npm cache
-        run: npm cache clean --force
+      - name: Install dependencies with retry
+        run: |
+          retry_count=0
+          max_retries=3
+          until [ $retry_count -ge $max_retries ]
+          do
+            npm ci --include=dev && break
+            retry_count=$((retry_count+1))
+            echo "Retrying npm install ($retry_count/$max_retries)..."
+            sleep 5
+          done
 
-      - name: Install dependencies
-        run: npm ci --include=dev
+      - name: Upload npm debug log
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: npm-debug-log
+          path: /home/runner/.npm/_logs/
 
       - name: Install Prisma CLI
         run: npm install -g prisma
