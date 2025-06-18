@@ -1,6 +1,7 @@
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
+import { ConfigService } from '@libs/infrastructure';
 import { HttpFilter } from '@libs/utils';
 
 import { ApiModule } from './api.module';
@@ -21,7 +22,9 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.port ?? 3000);
+  const config = app.get<ConfigService>(ConfigService);
+  const port = config.get('API_PORT');
+  await app.listen(port);
 }
 
 void bootstrap();
