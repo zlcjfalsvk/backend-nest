@@ -3,7 +3,16 @@ const AUTH_ERROR_CODES = {
   AUTH_UNAUTHORIZED: 'AUTH_UNAUTHORIZED',
 } as const;
 
-export const ERROR_CODES = { ...AUTH_ERROR_CODES } as const;
+const POST_ERROR_CODES = {
+  POST_NOT_FOUND: 'POST_NOT_FOUND',
+  POST_CONFLICT: 'POST_CONFLICT',
+  POST_DELETED: 'POST_DELETED',
+} as const;
+
+export const ERROR_CODES = {
+  ...AUTH_ERROR_CODES,
+  ...POST_ERROR_CODES,
+} as const;
 
 type ErrorCodeType = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];
 export class CustomError extends Error {
