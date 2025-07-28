@@ -1,4 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from 'vitest';
 
 import { ConfigService, EnvConfig } from './config.service';
 

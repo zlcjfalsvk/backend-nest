@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CommentService } from '@libs/business';
 
@@ -9,17 +10,18 @@ import {
   GetCommentsQueryDto,
 } from './dtos';
 
+// Create a mock CommentService
+const mockCommentService = {
+  findsByPostId: vi.fn(),
+  find: vi.fn(),
+  create: vi.fn(),
+  update: vi.fn(),
+  delete: vi.fn(),
+};
+
 describe('CommentsController', () => {
   let controller: CommentsController;
   let commentService: CommentService;
-
-  const mockCommentService = {
-    findsByPostId: jest.fn(),
-    find: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-  };
 
   const mockComment = {
     id: 1,
@@ -36,6 +38,9 @@ describe('CommentsController', () => {
   };
 
   beforeEach(async () => {
+    // Clear mock call history before creating module
+    vi.clearAllMocks();
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CommentsController],
       providers: [

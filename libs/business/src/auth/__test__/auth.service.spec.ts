@@ -1,7 +1,8 @@
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as argon2 from 'argon2';
-import { mockDeep, DeepMockProxy } from 'jest-mock-extended';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { mockDeep, DeepMockProxy } from 'vitest-mock-extended';
 
 import { AuthService } from '@libs/business';
 import { PrismaService } from '@libs/infrastructure';
@@ -15,9 +16,9 @@ import {
   TokenType,
 } from '../types';
 
-jest.mock('argon2', () => ({
-  hash: jest.fn(),
-  verify: jest.fn(),
+vi.mock('argon2', () => ({
+  hash: vi.fn(),
+  verify: vi.fn(),
 }));
 
 describe('AuthService', () => {
@@ -114,15 +115,12 @@ describe('AuthService', () => {
         updatedAt: new Date(),
       });
 
-      try {
-        await service.signUp(mockSignUpData);
-        fail('Expected CustomError to be thrown');
-      } catch (error) {
-        expect(error).toBeInstanceOf(CustomError);
-        expect(error.code).toBe(ERROR_CODES.AUTH_CONFLICT);
-        expect(error.message).toBe('Email already exists');
-        expect(error.name).toBe('CustomError');
-      }
+      await expect(service.signUp(mockSignUpData)).rejects.toThrow(CustomError);
+      await expect(service.signUp(mockSignUpData)).rejects.toMatchObject({
+        code: ERROR_CODES.AUTH_CONFLICT,
+        message: 'Email already exists',
+        name: 'CustomError',
+      });
 
       expect(prismaService.user.create.mock.calls.length).toBe(0);
     });
@@ -139,15 +137,12 @@ describe('AuthService', () => {
         updatedAt: new Date(),
       });
 
-      try {
-        await service.signUp(mockSignUpData);
-        fail('Expected CustomError to be thrown');
-      } catch (error) {
-        expect(error).toBeInstanceOf(CustomError);
-        expect(error.code).toBe(ERROR_CODES.AUTH_CONFLICT);
-        expect(error.message).toBe('Nickname already exists');
-        expect(error.name).toBe('CustomError');
-      }
+      await expect(service.signUp(mockSignUpData)).rejects.toThrow(CustomError);
+      await expect(service.signUp(mockSignUpData)).rejects.toMatchObject({
+        code: ERROR_CODES.AUTH_CONFLICT,
+        message: 'Nickname already exists',
+        name: 'CustomError',
+      });
 
       expect(prismaService.user.create.mock.calls.length).toBe(0);
     });
@@ -181,7 +176,7 @@ describe('AuthService', () => {
       prismaService.user.findUnique.mockResolvedValue(mockUser);
 
       // Mock password verification
-      jest.spyOn(argon2, 'verify').mockResolvedValue(true);
+      vi.spyOn(argon2, 'verify').mockResolvedValue(true);
 
       // Mock JWT token generation
       jwtService.sign.mockImplementation((payload: any) => {
@@ -206,15 +201,12 @@ describe('AuthService', () => {
       // Mock user not found
       prismaService.user.findUnique.mockResolvedValue(null);
 
-      try {
-        await service.signIn(mockSignInData);
-        fail('Expected CustomError to be thrown');
-      } catch (error) {
-        expect(error).toBeInstanceOf(CustomError);
-        expect(error.code).toBe(ERROR_CODES.AUTH_UNAUTHORIZED);
-        expect(error.message).toBe('Invalid email or password');
-        expect(error.name).toBe('CustomError');
-      }
+      await expect(service.signIn(mockSignInData)).rejects.toThrow(CustomError);
+      await expect(service.signIn(mockSignInData)).rejects.toMatchObject({
+        code: ERROR_CODES.AUTH_UNAUTHORIZED,
+        message: 'Invalid email or password',
+        name: 'CustomError',
+      });
 
       expect(prismaService.user.findUnique).toHaveBeenCalledWith({
         where: { email: mockSignInData.email },
@@ -226,17 +218,14 @@ describe('AuthService', () => {
       prismaService.user.findUnique.mockResolvedValue(mockUser);
 
       // Mock password verification to fail
-      jest.spyOn(argon2, 'verify').mockResolvedValue(false);
+      vi.spyOn(argon2, 'verify').mockResolvedValue(false);
 
-      try {
-        await service.signIn(mockSignInData);
-        fail('Expected CustomError to be thrown');
-      } catch (error) {
-        expect(error).toBeInstanceOf(CustomError);
-        expect(error.code).toBe(ERROR_CODES.AUTH_UNAUTHORIZED);
-        expect(error.message).toBe('Invalid email or password');
-        expect(error.name).toBe('CustomError');
-      }
+      await expect(service.signIn(mockSignInData)).rejects.toThrow(CustomError);
+      await expect(service.signIn(mockSignInData)).rejects.toMatchObject({
+        code: ERROR_CODES.AUTH_UNAUTHORIZED,
+        message: 'Invalid email or password',
+        name: 'CustomError',
+      });
 
       expect(prismaService.user.findUnique).toHaveBeenCalledWith({
         where: { email: mockSignInData.email },

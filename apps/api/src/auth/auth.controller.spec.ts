@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AuthService } from '@libs/business';
 import { CustomError, ERROR_CODES } from '@libs/utils';
@@ -8,8 +9,8 @@ import { SignInDto, SignUpDto } from './dtos';
 
 // Create a mock AuthService
 const mockAuthService = {
-  signUp: jest.fn(),
-  signIn: jest.fn(),
+  signUp: vi.fn(),
+  signIn: vi.fn(),
 };
 
 describe('AuthController', () => {
@@ -17,6 +18,9 @@ describe('AuthController', () => {
   let authService: AuthService;
 
   beforeEach(async () => {
+    // Reset mocks before creating module
+    vi.resetAllMocks();
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
       providers: [
@@ -29,9 +33,6 @@ describe('AuthController', () => {
 
     controller = module.get<AuthController>(AuthController);
     authService = module.get<AuthService>(AuthService);
-
-    // Reset mock calls before each test
-    jest.clearAllMocks();
   });
 
   describe('signUp', () => {

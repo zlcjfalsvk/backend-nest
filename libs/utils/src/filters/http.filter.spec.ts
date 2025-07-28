@@ -1,33 +1,34 @@
 import { ArgumentsHost } from '@nestjs/common';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CustomError, ERROR_CODES, HttpFilter } from '@libs/utils';
 
 describe('HttpFilter', () => {
   let filter: HttpFilter;
   let host: ArgumentsHost;
-  let mockResponse: { status: jest.Mock };
-  let mockJson: jest.Mock;
-  let mockStatus: jest.Mock;
+  let mockResponse: { status: any };
+  let mockJson: any;
+  let mockStatus: any;
 
   beforeEach(() => {
     filter = new HttpFilter();
 
     // Mock response object
-    mockJson = jest.fn().mockReturnThis();
-    mockStatus = jest.fn().mockReturnValue({ json: mockJson });
+    mockJson = vi.fn().mockReturnThis();
+    mockStatus = vi.fn().mockReturnValue({ json: mockJson });
     mockResponse = {
       status: mockStatus,
     };
 
     // Mock ArgumentsHost
     host = {
-      switchToHttp: jest.fn().mockReturnValue({
-        getResponse: jest.fn().mockReturnValue(mockResponse),
-        getRequest: jest.fn().mockReturnValue({}),
+      switchToHttp: vi.fn().mockReturnValue({
+        getResponse: vi.fn().mockReturnValue(mockResponse),
+        getRequest: vi.fn().mockReturnValue({}),
       }),
-      getArgByIndex: jest.fn(),
-      getArgs: jest.fn(),
-      getType: jest.fn(),
+      getArgByIndex: vi.fn(),
+      getArgs: vi.fn(),
+      getType: vi.fn(),
     } as unknown as ArgumentsHost;
   });
 

@@ -1,21 +1,23 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PostService } from '@libs/business';
 
 import { CreatePostDto, UpdatePostDto, GetPostsQueryDto } from './dtos';
 import { PostsController } from './posts.controller';
 
+// Create a mock PostService
+const mockPostService = {
+  finds: vi.fn(),
+  find: vi.fn(),
+  create: vi.fn(),
+  update: vi.fn(),
+  delete: vi.fn(),
+};
+
 describe('PostsController', () => {
   let controller: PostsController;
   let postService: PostService;
-
-  const mockPostService = {
-    finds: jest.fn(),
-    find: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-  };
 
   const mockPost = {
     id: 1,
@@ -35,6 +37,9 @@ describe('PostsController', () => {
   };
 
   beforeEach(async () => {
+    // Clear mock call history before creating module
+    vi.clearAllMocks();
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PostsController],
       providers: [

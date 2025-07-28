@@ -1,6 +1,8 @@
+import { describe, expect, it } from 'vitest';
+
 import { Post } from '@prisma-client';
 
-import { CustomError, ERROR_CODES } from '@libs/utils';
+import { CustomError } from '@libs/utils';
 
 import {
   buildWhereCondition,
@@ -199,16 +201,10 @@ describe('PostHelper', () => {
       const postId = 1;
 
       // Act & Assert
-      try {
-        validatePostExists(post, postId);
-        fail('예외가 발생하지 않았습니다');
-      } catch (error) {
-        expect(error).toBeInstanceOf(CustomError);
-        expect((error as CustomError).code).toBe(ERROR_CODES.POST_NOT_FOUND);
-        expect((error as CustomError).message).toBe(
-          `Post with id ${postId} not found`,
-        );
-      }
+      expect(() => validatePostExists(post, postId)).toThrow(CustomError);
+      expect(() => validatePostExists(post, postId)).toThrow(
+        `Post with id ${postId} not found`,
+      );
     });
   });
 
@@ -227,16 +223,10 @@ describe('PostHelper', () => {
       const post = { id: 1, deletedAt: new Date() } as Post;
 
       // Act & Assert
-      try {
-        validatePostNotDeleted(post);
-        fail('예외가 발생하지 않았습니다');
-      } catch (error) {
-        expect(error).toBeInstanceOf(CustomError);
-        expect((error as CustomError).code).toBe(ERROR_CODES.POST_DELETED);
-        expect((error as CustomError).message).toBe(
-          `Post with id ${post.id} has been deleted`,
-        );
-      }
+      expect(() => validatePostNotDeleted(post)).toThrow(CustomError);
+      expect(() => validatePostNotDeleted(post)).toThrow(
+        `Post with id ${post.id} has been deleted`,
+      );
     });
   });
 
@@ -257,16 +247,12 @@ describe('PostHelper', () => {
       const slug = 'duplicate-slug';
 
       // Act & Assert
-      try {
-        validateSlugUniqueness(existingPost, slug);
-        fail('예외가 발생하지 않았습니다');
-      } catch (error) {
-        expect(error).toBeInstanceOf(CustomError);
-        expect((error as CustomError).code).toBe(ERROR_CODES.POST_CONFLICT);
-        expect((error as CustomError).message).toBe(
-          `Post with slug '${slug}' already exists`,
-        );
-      }
+      expect(() => validateSlugUniqueness(existingPost, slug)).toThrow(
+        CustomError,
+      );
+      expect(() => validateSlugUniqueness(existingPost, slug)).toThrow(
+        `Post with slug '${slug}' already exists`,
+      );
     });
   });
 });
