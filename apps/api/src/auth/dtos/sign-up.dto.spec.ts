@@ -1,4 +1,5 @@
 import { validate } from 'class-validator';
+
 import { SignUpDto } from './sign-up.dto';
 
 describe('SignUpDto Validation', () => {
