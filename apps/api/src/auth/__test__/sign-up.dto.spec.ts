@@ -1,7 +1,7 @@
 import { validate } from 'class-validator';
 import { describe, expect, it } from 'vitest';
 
-import { SignUpDto } from './sign-up.dto';
+import { SignUpDto } from '../dtos';
 
 describe('SignUpDto Validation', () => {
   it('should pass validation with valid data', async () => {

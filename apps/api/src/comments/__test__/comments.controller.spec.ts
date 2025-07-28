@@ -3,12 +3,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CommentService } from '@libs/business';
 
-import { CommentsController } from './comments.controller';
+import { CommentsController } from '../comments.controller';
 import {
   CreateCommentDto,
   UpdateCommentDto,
   GetCommentsQueryDto,
-} from './dtos';
+} from '../dtos';
 
 // Create a mock CommentService
 const mockCommentService = {

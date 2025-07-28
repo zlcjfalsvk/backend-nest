@@ -4,8 +4,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthService } from '@libs/business';
 import { CustomError, ERROR_CODES } from '@libs/utils';
 
-import { AuthController } from './auth.controller';
-import { SignInDto, SignUpDto } from './dtos';
+import { AuthController } from '../auth.controller';
+import { SignInDto, SignUpDto } from '../dtos';
 
 // Create a mock AuthService
 const mockAuthService = {

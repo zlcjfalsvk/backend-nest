@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { PostService } from '@libs/business';
 
-import { CreatePostDto, UpdatePostDto, GetPostsQueryDto } from './dtos';
-import { PostsController } from './posts.controller';
+import { CreatePostDto, UpdatePostDto, GetPostsQueryDto } from '../dtos';
+import { PostsController } from '../posts.controller';
 
 // Create a mock PostService
 const mockPostService = {
