@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { DeepMockProxy, mockDeep } from 'vitest-mock-extended';
 
 import { AuthService } from '@libs/business';
 import { CustomError, ERROR_CODES } from '@libs/utils';
@@ -7,32 +8,27 @@ import { CustomError, ERROR_CODES } from '@libs/utils';
 import { AuthController } from '../auth.controller';
 import { SignInDto, SignUpDto } from '../dtos';
 
-// Create a mock AuthService
-const mockAuthService = {
-  signUp: vi.fn(),
-  signIn: vi.fn(),
-};
-
 describe('AuthController', () => {
   let controller: AuthController;
-  let authService: AuthService;
+  let authService: DeepMockProxy<AuthService>;
 
   beforeEach(async () => {
     // Reset mocks before creating module
     vi.resetAllMocks();
+
+    authService = mockDeep<AuthService>();
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
       providers: [
         {
           provide: AuthService,
-          useValue: mockAuthService,
+          useValue: authService,
         },
       ],
     }).compile();
 
     controller = module.get<AuthController>(AuthController);
-    authService = module.get<AuthService>(AuthService);
   });
 
   describe('signUp', () => {
@@ -54,7 +50,7 @@ describe('AuthController', () => {
         updatedAt: new Date(),
       };
 
-      mockAuthService.signUp.mockResolvedValue(expectedResult);
+      authService.signUp.mockResolvedValue(expectedResult);
 
       // Act
       const result = await controller.signUp(signUpDto);
@@ -77,7 +73,7 @@ describe('AuthController', () => {
         ERROR_CODES.AUTH_CONFLICT,
         'Email already exists',
       );
-      mockAuthService.signUp.mockRejectedValue(error);
+      authService.signUp.mockRejectedValue(error);
 
       // Act & Assert
       await expect(controller.signUp(signUpDto)).rejects.toThrow(error);
@@ -97,7 +93,7 @@ describe('AuthController', () => {
         ERROR_CODES.AUTH_CONFLICT,
         'Nickname already exists',
       );
-      mockAuthService.signUp.mockRejectedValue(error);
+      authService.signUp.mockRejectedValue(error);
 
       // Act & Assert
       await expect(controller.signUp(signUpDto)).rejects.toThrow(error);
@@ -119,7 +115,7 @@ describe('AuthController', () => {
         ERROR_CODES.AUTH_UNAUTHORIZED,
         'Password must be at least 10 characters long and contain at least one uppercase letter, one lowercase letter, and one special character (!@#$%^&*_)',
       );
-      mockAuthService.signUp.mockRejectedValue(error);
+      authService.signUp.mockRejectedValue(error);
 
       // Act & Assert
       await expect(controller.signUp(signUpDto)).rejects.toThrow(error);
@@ -141,7 +137,7 @@ describe('AuthController', () => {
         refreshToken: 'refresh-token',
       };
 
-      mockAuthService.signIn.mockResolvedValue(expectedResult);
+      authService.signIn.mockResolvedValue(expectedResult);
 
       // Act
       const result = await controller.signIn(signInDto);
@@ -162,7 +158,7 @@ describe('AuthController', () => {
         ERROR_CODES.AUTH_UNAUTHORIZED,
         'Invalid email or password',
       );
-      mockAuthService.signIn.mockRejectedValue(error);
+      authService.signIn.mockRejectedValue(error);
 
       // Act & Assert
       await expect(controller.signIn(signInDto)).rejects.toThrow(error);

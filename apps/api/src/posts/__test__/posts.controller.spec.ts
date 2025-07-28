@@ -1,23 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { DeepMockProxy, mockDeep } from 'vitest-mock-extended';
 
 import { PostService } from '@libs/business';
 
 import { CreatePostDto, UpdatePostDto, GetPostsQueryDto } from '../dtos';
 import { PostsController } from '../posts.controller';
 
-// Create a mock PostService
-const mockPostService = {
-  finds: vi.fn(),
-  find: vi.fn(),
-  create: vi.fn(),
-  update: vi.fn(),
-  delete: vi.fn(),
-};
-
 describe('PostsController', () => {
   let controller: PostsController;
-  let postService: PostService;
+  let postService: DeepMockProxy<PostService>;
 
   const mockPost = {
     id: 1,
@@ -40,18 +32,19 @@ describe('PostsController', () => {
     // Clear mock call history before creating module
     vi.clearAllMocks();
 
+    postService = mockDeep<PostService>();
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PostsController],
       providers: [
         {
           provide: PostService,
-          useValue: mockPostService,
+          useValue: postService,
         },
       ],
     }).compile();
 
     controller = module.get<PostsController>(PostsController);
-    postService = module.get<PostService>(PostService);
   });
 
   it('컨트롤러가 정의되어야 한다', () => {
@@ -72,7 +65,7 @@ describe('PostsController', () => {
         nextCursor: null,
       };
 
-      mockPostService.finds.mockResolvedValue(mockResponse);
+      postService.finds.mockResolvedValue(mockResponse);
 
       const result = await controller.getPosts(query);
 
@@ -86,7 +79,7 @@ describe('PostsController', () => {
       const postId = 1;
       const mockResponse = { ...mockPost, views: 1 };
 
-      mockPostService.find.mockResolvedValue(mockResponse);
+      postService.find.mockResolvedValue(mockResponse);
 
       const result = await controller.getPost(postId);
 
@@ -105,7 +98,7 @@ describe('PostsController', () => {
         authorId: 'user-1',
       };
 
-      mockPostService.create.mockResolvedValue(mockPost);
+      postService.create.mockResolvedValue(mockPost);
 
       const result = await controller.createPost(createPostDto);
 
@@ -123,7 +116,7 @@ describe('PostsController', () => {
       };
 
       const updatedPost = { ...mockPost, ...updatePostDto };
-      mockPostService.update.mockResolvedValue(updatedPost);
+      postService.update.mockResolvedValue(updatedPost);
 
       const result = await controller.updatePost(postId, updatePostDto);
 
@@ -140,7 +133,7 @@ describe('PostsController', () => {
       const postId = 1;
       const deletedPost = { ...mockPost, deletedAt: new Date() };
 
-      mockPostService.delete.mockResolvedValue(deletedPost);
+      postService.delete.mockResolvedValue(deletedPost);
 
       await controller.deletePost(postId);
 

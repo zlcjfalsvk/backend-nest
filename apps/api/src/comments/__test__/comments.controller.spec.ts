@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { DeepMockProxy, mockDeep } from 'vitest-mock-extended';
 
 import { CommentService } from '@libs/business';
 
@@ -10,18 +11,9 @@ import {
   GetCommentsQueryDto,
 } from '../dtos';
 
-// Create a mock CommentService
-const mockCommentService = {
-  findsByPostId: vi.fn(),
-  find: vi.fn(),
-  create: vi.fn(),
-  update: vi.fn(),
-  delete: vi.fn(),
-};
-
 describe('CommentsController', () => {
   let controller: CommentsController;
-  let commentService: CommentService;
+  let commentService: DeepMockProxy<CommentService>;
 
   const mockComment = {
     id: 1,
@@ -41,18 +33,19 @@ describe('CommentsController', () => {
     // Clear mock call history before creating module
     vi.clearAllMocks();
 
+    commentService = mockDeep<CommentService>();
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CommentsController],
       providers: [
         {
           provide: CommentService,
-          useValue: mockCommentService,
+          useValue: commentService,
         },
       ],
     }).compile();
 
     controller = module.get<CommentsController>(CommentsController);
-    commentService = module.get<CommentService>(CommentService);
   });
 
   it('컨트롤러가 정의되어야 한다', () => {
@@ -73,7 +66,7 @@ describe('CommentsController', () => {
         nextCursor: null,
       };
 
-      mockCommentService.findsByPostId.mockResolvedValue(mockResponse);
+      commentService.findsByPostId.mockResolvedValue(mockResponse);
 
       const result = await controller.getCommentsByPostId(postId, query);
 
@@ -89,7 +82,7 @@ describe('CommentsController', () => {
     it('특정 댓글을 반환해야 한다', async () => {
       const commentId = 1;
 
-      mockCommentService.find.mockResolvedValue(mockComment);
+      commentService.find.mockResolvedValue(mockComment);
 
       const result = await controller.getComment(commentId);
 
@@ -106,7 +99,7 @@ describe('CommentsController', () => {
         authorId: 'user-1',
       };
 
-      mockCommentService.create.mockResolvedValue(mockComment);
+      commentService.create.mockResolvedValue(mockComment);
 
       const result = await controller.createComment(createCommentDto);
 
@@ -123,7 +116,7 @@ describe('CommentsController', () => {
       };
 
       const updatedComment = { ...mockComment, ...updateCommentDto };
-      mockCommentService.update.mockResolvedValue(updatedComment);
+      commentService.update.mockResolvedValue(updatedComment);
 
       const result = await controller.updateComment(
         commentId,
@@ -143,7 +136,7 @@ describe('CommentsController', () => {
       const commentId = 1;
       const deletedComment = { ...mockComment, deletedAt: new Date() };
 
-      mockCommentService.delete.mockResolvedValue(deletedComment);
+      commentService.delete.mockResolvedValue(deletedComment);
 
       await controller.deleteComment(commentId);
 
