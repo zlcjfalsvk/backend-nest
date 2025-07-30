@@ -28,3 +28,8 @@ export const TokenType = {
   ACCESS_TOKEN: 'a',
   REFRESH_TOKEN: 'r',
 } as const;
+
+export type Token = {
+  sub: string;
+  type: (typeof TokenType)[keyof typeof TokenType];
+};

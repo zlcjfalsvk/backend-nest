@@ -10,11 +10,13 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 
 import { PostService } from '@libs/business';
 
 import { CreatePostDto, UpdatePostDto, GetPostsQueryDto } from './dtos';
+import { AccessTokenGuard } from '../auth/guards';
 
 @Controller('posts')
 export class PostsController {
@@ -31,12 +33,14 @@ export class PostsController {
   }
 
   @Post()
+  @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.CREATED)
   async createPost(@Body() createPostDto: CreatePostDto) {
     return this.postService.create(createPostDto);
   }
 
   @Put(':id')
+  @UseGuards(AccessTokenGuard)
   async updatePost(
     @Param('id', ParseIntPipe) id: number,
     @Body() updatePostDto: UpdatePostDto,
@@ -45,6 +49,7 @@ export class PostsController {
   }
 
   @Delete(':id')
+  @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deletePost(@Param('id', ParseIntPipe) id: number) {
     await this.postService.delete(id);

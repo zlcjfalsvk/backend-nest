@@ -10,6 +10,7 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 
 import { CommentService } from '@libs/business';
@@ -19,6 +20,7 @@ import {
   UpdateCommentDto,
   GetCommentsQueryDto,
 } from './dtos';
+import { AccessTokenGuard } from '../auth/guards';
 
 @Controller('comments')
 export class CommentsController {
@@ -41,12 +43,14 @@ export class CommentsController {
   }
 
   @Post()
+  @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.CREATED)
   async createComment(@Body() createCommentDto: CreateCommentDto) {
     return this.commentService.create(createCommentDto);
   }
 
   @Put(':id')
+  @UseGuards(AccessTokenGuard)
   async updateComment(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCommentDto: UpdateCommentDto,
@@ -55,6 +59,7 @@ export class CommentsController {
   }
 
   @Delete(':id')
+  @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteComment(@Param('id', ParseIntPipe) id: number) {
     await this.commentService.delete(id);
