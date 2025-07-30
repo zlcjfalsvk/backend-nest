@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { JwtService } from '@nestjs/jwt';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DeepMockProxy, mockDeep } from 'vitest-mock-extended';
 
@@ -10,10 +11,12 @@ import {
   UpdateCommentDto,
   GetCommentsQueryDto,
 } from '../dtos';
+import { AccessTokenGuard } from '../../auth/guards';
 
 describe('CommentsController', () => {
   let controller: CommentsController;
   let commentService: DeepMockProxy<CommentService>;
+  let jwtService: DeepMockProxy<JwtService>;
 
   const mockComment = {
     id: 1,
@@ -34,6 +37,7 @@ describe('CommentsController', () => {
     vi.clearAllMocks();
 
     commentService = mockDeep<CommentService>();
+    jwtService = mockDeep<JwtService>();
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CommentsController],
@@ -42,6 +46,11 @@ describe('CommentsController', () => {
           provide: CommentService,
           useValue: commentService,
         },
+        {
+          provide: JwtService,
+          useValue: jwtService,
+        },
+        AccessTokenGuard,
       ],
     }).compile();
 

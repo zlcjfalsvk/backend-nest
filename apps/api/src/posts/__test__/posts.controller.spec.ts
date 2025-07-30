@@ -1,15 +1,18 @@
+import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DeepMockProxy, mockDeep } from 'vitest-mock-extended';
 
 import { PostService } from '@libs/business';
 
+import { AccessTokenGuard } from '../../auth/guards';
 import { CreatePostDto, UpdatePostDto, GetPostsQueryDto } from '../dtos';
 import { PostsController } from '../posts.controller';
 
 describe('PostsController', () => {
   let controller: PostsController;
   let postService: DeepMockProxy<PostService>;
+  let jwtService: DeepMockProxy<JwtService>;
 
   const mockPost = {
     id: 1,
@@ -33,6 +36,7 @@ describe('PostsController', () => {
     vi.clearAllMocks();
 
     postService = mockDeep<PostService>();
+    jwtService = mockDeep<JwtService>();
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PostsController],
@@ -41,6 +45,11 @@ describe('PostsController', () => {
           provide: PostService,
           useValue: postService,
         },
+        {
+          provide: JwtService,
+          useValue: jwtService,
+        },
+        AccessTokenGuard,
       ],
     }).compile();
 
