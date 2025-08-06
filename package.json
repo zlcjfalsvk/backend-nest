@@ -15,6 +15,8 @@
     "api:start:prod": "npm run build && node dist/apps/be-layered-example/main",
     "prisma:generate": "prisma generate",
     "prisma:script": "prisma migrate dev --create-only",
+    "prisma:migrate:postgresql": "npx prisma migrate dev --schema=./prisma/schema.prisma",
+    "prisma:migrate:postgresql:deploy": "npx prisma migrate deploy --schema=./prisma/schema.prisma",
     "test:unit": "vitest"
   },
   "dependencies": {
