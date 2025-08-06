@@ -13,6 +13,8 @@ generator client {
 datasource db {
   provider     = "postgresql"
   url          = env("DATABASE_URL")
+  // FK 가 아닌 Index 를 사용하는 Prisma Mode
+  // - https://www.prisma.io/docs/orm/prisma-schema/data-model/relations/relation-mode#switch-from-foreignkeys-to-prisma
   relationMode = "prisma"
 }
 
