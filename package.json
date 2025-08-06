@@ -12,6 +12,8 @@
   "scripts": {
     "api:start": "nest start --debug --watch",
     "api:start:prod": "npm run build && node dist/apps/be-layered-example/main",
+    "trpc:start": "nest start trpc --debug --watch",
+    "trpc:start:prod": "npm run build && node dist/apps/trpc/main",
     "prisma:generate": "prisma generate",
     "prisma:script": "prisma migrate dev --create-only",
     "prisma:migrate:postgresql": "npx prisma migrate dev --schema=./prisma/schema.prisma",
@@ -24,12 +26,18 @@
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/platform-express": "^11.0.1",
     "@prisma/client": "^6.9.0",
+    "@trpc/client": "^11.4.4",
+    "@trpc/server": "^11.4.4",
+    "@types/cors": "^2.8.19",
     "argon2": "^0.43.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
     "joi": "^17.13.3",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "zod": "^4.0.15"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -40,7 +48,7 @@
     "@swc/cli": "^0.6.0",
     "@swc/core": "^1.13.2",
     "@types/bcrypt": "^5.0.2",
-    "@types/express": "^5.0.0",
+    "@types/express": "^5.0.3",
     "@types/node": "^22.10.7",
     "@types/supertest": "^6.0.2",
     "@vitest/coverage-v8": "^3.2.4",

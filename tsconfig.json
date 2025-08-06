@@ -18,10 +18,21 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@prisma-client": ["prisma/prisma-clients"],
-      "@libs/business": ["libs/business/src"],
-      "@libs/infrastructure": ["libs/infrastructure/src"],
-      "@libs/utils": ["libs/utils/src"]
+      "@libs/adapter": [
+        "libs/adapter/src"
+      ],
+      "@libs/business": [
+        "libs/business/src"
+      ],
+      "@libs/infrastructure": [
+        "libs/infrastructure/src"
+      ],
+      "@libs/utils": [
+        "libs/utils/src"
+      ],
+      "@prisma-client": [
+        "prisma/prisma-clients"
+      ]
     }
   }
 }

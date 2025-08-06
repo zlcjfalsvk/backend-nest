@@ -10,6 +10,15 @@
   "monorepo": true,
   "root": "apps/api",
   "projects": {
+    "adapter": {
+      "type": "library",
+      "root": "libs/adapter",
+      "entryFile": "index",
+      "sourceRoot": "libs/adapter/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/adapter/tsconfig.lib.json"
+      }
+    },
     "api": {
       "type": "application",
       "root": "apps/api",
@@ -35,6 +44,15 @@
       "sourceRoot": "libs/infrastructure/src",
       "compilerOptions": {
         "tsConfigPath": "libs/infrastructure/tsconfig.lib.json"
+      }
+    },
+    "trpc": {
+      "type": "application",
+      "root": "apps/trpc",
+      "entryFile": "main",
+      "sourceRoot": "apps/trpc/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/trpc/tsconfig.app.json"
       }
     },
     "utils": {
