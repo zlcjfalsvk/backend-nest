@@ -9,7 +9,7 @@ import { PostsControllerModule } from './posts/posts.controller.module';
 @Module({
   imports: [
     ConfigModule.forRoot('api'),
-    PrismaModule.forRoot(),
+    PrismaModule,
     AuthControllerModule,
     PostsControllerModule,
     CommentsControllerModule,
