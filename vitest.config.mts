@@ -1,11 +1,9 @@
-/// <reference types="vitest" />
-import { defineConfig } from 'vitest/config';
+import { resolve } from 'path';
 import swc from 'unplugin-swc';
-import tsconfigPaths from 'vite-tsconfig-paths';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   plugins: [
-    tsconfigPaths(),
     swc.vite({
       jsc: {
         parser: {
@@ -31,6 +29,16 @@ export default defineConfig({
       inlineSourcesContent: true,
     }),
   ],
+
+  resolve: {
+    alias: {
+      '@libs/adapter': resolve(__dirname, 'libs/adapter/src'),
+      '@libs/business': resolve(__dirname, 'libs/business/src'),
+      '@libs/infrastructure': resolve(__dirname, 'libs/infrastructure/src'),
+      '@libs/utils': resolve(__dirname, 'libs/utils/src'),
+      '@prisma-client': resolve(__dirname, 'prisma/prisma-clients'),
+    },
+  },
 
   test: {
     globals: true,
