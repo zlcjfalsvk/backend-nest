@@ -9,6 +9,7 @@
     "node": ">=22.0.0",
     "npm": ">=10.0.0"
   },
+  "type": "module",
   "scripts": {
     "api:start": "nest start --debug --watch",
     "api:start:prod": "npm run build && node dist/apps/be-layered-example/main",
