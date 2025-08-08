@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import * as Joi from 'joi';
+import { z } from 'zod';
 
 // 환경 변수 타입 정의, 나중에 추가할 수 있음
 export type ServerType = 'api' | 'admin' | 'worker';
@@ -33,43 +33,36 @@ export class ConfigService {
   }
 
   private validateEnvVariables(env: NodeJS.ProcessEnv): EnvConfig {
-    const baseSchema = {
-      API_PORT: Joi.number().default(3000),
-      TRPC_PORT: Joi.number().default(3001),
-      JWT_ACCESS_SECRET: Joi.string().required(),
-      JWT_REFRESH_SECRET: Joi.string().required(),
-      JWT_EXPIRES_IN: Joi.string().required(),
-      DATABASE_URL: Joi.string().required(),
-    };
+    const baseSchema = z.object({
+      API_PORT: z.coerce.number().default(3000),
+      TRPC_PORT: z.coerce.number().default(3001),
+      JWT_ACCESS_SECRET: z.string().min(1, 'JWT_ACCESS_SECRET is required'),
+      JWT_REFRESH_SECRET: z.string().min(1, 'JWT_REFRESH_SECRET is required'),
+      JWT_EXPIRES_IN: z.string().min(1, 'JWT_EXPIRES_IN is required'),
+      DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
+    });
 
-    const serverSchemas: Record<ServerType, Joi.SchemaMap> = {
-      api: {
-        ...baseSchema,
-        API_PORT: Joi.number().default(3000),
-      },
-      admin: {
-        ...baseSchema,
-      },
-      worker: {
-        ...baseSchema,
-      },
+    const serverSchemas: Record<ServerType, z.ZodSchema<any>> = {
+      api: baseSchema,
+      admin: baseSchema,
+      worker: baseSchema,
     };
 
     // 현재 서버 타입에 대한 스키마 가져오기
-    const schema = Joi.object(serverSchemas[this.serverType]);
+    const schema = serverSchemas[this.serverType];
 
     // 환경 변수 검증
-    const validationResult = schema.validate(env, {
-      allowUnknown: true,
-      convert: true,
-    });
-
-    if (validationResult.error) {
-      throw new Error(
-        `Config validation error: ${validationResult.error.message}`,
-      );
+    try {
+      const validationResult = schema.parse(env);
+      return validationResult as EnvConfig;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errorMessage = error.issues
+          .map((err) => `${err.path.join('.')}: ${err.message}`)
+          .join(', ');
+        throw new Error(`Config validation error: ${errorMessage}`);
+      }
+      throw error;
     }
-
-    return validationResult.value as EnvConfig;
   }
 }
