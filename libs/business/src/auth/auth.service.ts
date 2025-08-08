@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 
-import { PrismaService } from '@libs/infrastructure';
+import { PrismaService, ConfigService } from '@libs/infrastructure';
 import { CustomError, ERROR_CODES } from '@libs/utils';
 
 import {
@@ -18,6 +18,7 @@ export class AuthService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
   async signUp(param: SignUpType): Promise<SignUpResponseType> {
@@ -94,7 +95,10 @@ export class AuthService {
         sub: user.id,
         type: TokenType.ACCESS_TOKEN,
       },
-      { expiresIn: '1h' },
+      {
+        secret: this.configService.get('JWT_ACCESS_SECRET'),
+        expiresIn: '1h',
+      },
     );
 
     const refreshToken = this.jwtService.sign(
@@ -102,7 +106,10 @@ export class AuthService {
         sub: accessToken,
         type: TokenType.REFRESH_TOKEN,
       },
-      { expiresIn: '1h' },
+      {
+        secret: this.configService.get('JWT_REFRESH_SECRET'),
+        expiresIn: '1h',
+      },
     );
 
     // 5. 응답 반환

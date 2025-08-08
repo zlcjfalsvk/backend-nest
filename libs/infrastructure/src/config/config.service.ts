@@ -10,7 +10,8 @@ export interface EnvConfig {
   TRPC_PORT: number;
 
   // JWT
-  JWT_SECRET: string;
+  JWT_ACCESS_SECRET: string;
+  JWT_REFRESH_SECRET: string;
   JWT_EXPIRES_IN: string;
 
   // 데이터베이스
@@ -35,7 +36,8 @@ export class ConfigService {
     const baseSchema = {
       API_PORT: Joi.number().default(3000),
       TRPC_PORT: Joi.number().default(3001),
-      JWT_SECRET: Joi.string().required(),
+      JWT_ACCESS_SECRET: Joi.string().required(),
+      JWT_REFRESH_SECRET: Joi.string().required(),
       JWT_EXPIRES_IN: Joi.string().required(),
       DATABASE_URL: Joi.string().required(),
     };
