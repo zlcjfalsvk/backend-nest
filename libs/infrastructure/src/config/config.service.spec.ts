@@ -83,20 +83,6 @@ describe('ConfigService', () => {
       const configService = new ConfigService('api');
       expect(configService.get('API_PORT')).toBe(4000);
     });
-
-    it('admin 서버 타입으로 초기화되어야 함', () => {
-      setupEnvVariables();
-      const configService = new ConfigService('admin');
-      // Admin은 API_PORT가 필요하지 않으므로 undefined여야 함
-      expect(configService.get('API_PORT')).toBeUndefined();
-    });
-
-    it('worker 서버 타입으로 초기화되어야 함', () => {
-      setupEnvVariables();
-      const configService = new ConfigService('worker');
-      // Worker는 API_PORT가 필요하지 않으므로 undefined여야 함
-      expect(configService.get('API_PORT')).toBeUndefined();
-    });
   });
 
   describe('환경 변수 검증', () => {

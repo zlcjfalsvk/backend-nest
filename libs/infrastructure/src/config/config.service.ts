@@ -7,6 +7,7 @@ export type ServerType = 'api' | 'admin' | 'worker';
 export interface EnvConfig {
   // 서버
   API_PORT: number;
+  TRPC_PORT: number;
 
   // JWT
   JWT_SECRET: string;
@@ -32,6 +33,8 @@ export class ConfigService {
 
   private validateEnvVariables(env: NodeJS.ProcessEnv): EnvConfig {
     const baseSchema = {
+      API_PORT: Joi.number().default(3000),
+      TRPC_PORT: Joi.number().default(3001),
       JWT_SECRET: Joi.string().required(),
       JWT_EXPIRES_IN: Joi.string().required(),
       DATABASE_URL: Joi.string().required(),

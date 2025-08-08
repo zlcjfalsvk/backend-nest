@@ -3,6 +3,8 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import * as cors from 'cors';
 
+import { ConfigService } from '@libs/infrastructure';
+
 import { TrpcModule } from './trpc.module';
 import { TrpcRouter } from './trpc.router';
 
@@ -16,6 +18,9 @@ async function bootstrap() {
   // tRPC 라우터 인스턴스 가져오기
   const trpcRouter = app.get(TrpcRouter);
 
+  // ConfigService 인스턴스 가져오기
+  const configService = app.get(ConfigService);
+
   // tRPC Express 미들웨어 생성
   const trpcMiddleware = createExpressMiddleware({
     router: trpcRouter.appRouter,
@@ -25,7 +30,7 @@ async function bootstrap() {
   // tRPC 미들웨어 등록
   app.use('/trpc', trpcMiddleware);
 
-  const port = process.env.PORT ?? 3001;
+  const port = configService.get('TRPC_PORT');
   await app.listen(port, '0.0.0.0');
 
   console.log(`tRPC 서버가 http://localhost:${port}/trpc 에서 실행 중입니다.`);
