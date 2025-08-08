@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DeepMockProxy, mockDeep } from 'vitest-mock-extended';
 
 import { CommentService } from '@libs/business';
+import { PrismaService } from '@libs/infrastructure';
 
 import { AccessTokenGuard } from '../../auth/guards';
 import { CommentsController } from '../comments.controller';
@@ -17,6 +18,7 @@ describe('CommentsController', () => {
   let controller: CommentsController;
   let commentService: DeepMockProxy<CommentService>;
   let jwtService: DeepMockProxy<JwtService>;
+  let prismaService: DeepMockProxy<PrismaService>;
 
   const mockComment = {
     id: 1,
@@ -38,6 +40,7 @@ describe('CommentsController', () => {
 
     commentService = mockDeep<CommentService>();
     jwtService = mockDeep<JwtService>();
+    prismaService = mockDeep<PrismaService>();
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CommentsController],
@@ -49,6 +52,10 @@ describe('CommentsController', () => {
         {
           provide: JwtService,
           useValue: jwtService,
+        },
+        {
+          provide: PrismaService,
+          useValue: prismaService,
         },
         AccessTokenGuard,
       ],

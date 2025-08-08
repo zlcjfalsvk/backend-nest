@@ -1,8 +1,4 @@
-import {
-  ExecutionContext,
-  ForbiddenException,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { beforeEach, describe, expect, it, vi, afterEach } from 'vitest';
 import { DeepMockProxy, mockDeep } from 'vitest-mock-extended';
@@ -15,7 +11,7 @@ import { AuthorOwnershipGuard } from '../author-ownership.guard';
 describe('AuthorOwnershipGuard', () => {
   let guard: AuthorOwnershipGuard;
   let prismaService: DeepMockProxy<PrismaService>;
-  let executionContext: jest.Mocked<ExecutionContext>;
+  let executionContext: any;
 
   const mockUser: Token = {
     sub: 'user-id-123',
@@ -26,7 +22,7 @@ describe('AuthorOwnershipGuard', () => {
     controllerName: string,
     params: Record<string, string> = { id: '1' },
     user: Token | null = mockUser,
-  ): jest.Mocked<ExecutionContext> => {
+  ) => {
     const mockRequest = {
       params,
       user,
@@ -39,7 +35,7 @@ describe('AuthorOwnershipGuard', () => {
     const mockExecutionContext = {
       switchToHttp: vi.fn().mockReturnValue(mockHttpArgumentsHost),
       getClass: vi.fn().mockReturnValue({ name: controllerName }),
-    } as unknown as jest.Mocked<ExecutionContext>;
+    };
 
     return mockExecutionContext;
   };
