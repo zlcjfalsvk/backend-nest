@@ -32,7 +32,8 @@ describe('ConfigService', () => {
 
   // 테스트용 환경 변수 설정 헬퍼 함수
   const setupEnvVariables = (config: Partial<EnvConfig> = {}) => {
-    process.env.JWT_SECRET = config.JWT_SECRET || 'test-secret';
+    process.env.JWT_ACCESS_SECRET = config.JWT_ACCESS_SECRET || 'test-access-secret';
+    process.env.JWT_REFRESH_SECRET = config.JWT_REFRESH_SECRET || 'test-refresh-secret';
     process.env.JWT_EXPIRES_IN = config.JWT_EXPIRES_IN || '1h';
     process.env.DATABASE_URL =
       config.DATABASE_URL || 'postgresql://user:password@localhost:5432/db';
@@ -63,7 +64,8 @@ describe('ConfigService', () => {
     });
 
     it('설정 값을 조회할 수 있어야 함', () => {
-      expect(service.get('JWT_SECRET')).toBe('test-secret');
+      expect(service.get('JWT_ACCESS_SECRET')).toBe('test-access-secret');
+      expect(service.get('JWT_REFRESH_SECRET')).toBe('test-refresh-secret');
       expect(service.get('JWT_EXPIRES_IN')).toBe('1h');
       expect(service.get('DATABASE_URL')).toBe(
         'postgresql://user:password@localhost:5432/db',
@@ -95,8 +97,9 @@ describe('ConfigService', () => {
     });
 
     it('필수 변수가 누락될 때 오류를 발생시켜야 함', () => {
-      // JWT_SECRET 누락
+      // JWT_ACCESS_SECRET 누락
       process.env = {
+        JWT_REFRESH_SECRET: 'test-refresh-secret',
         JWT_EXPIRES_IN: '1h',
         DATABASE_URL: 'postgresql://user:password@localhost:5432/db',
       };
@@ -104,9 +107,16 @@ describe('ConfigService', () => {
       expect(() => new ConfigService()).toThrow(/Config validation error/);
     });
 
-    it('JWT_SECRET이 누락될 때 오류를 발생시켜야 함', () => {
+    it('JWT_ACCESS_SECRET이 누락될 때 오류를 발생시켜야 함', () => {
       setupEnvVariables();
-      delete process.env.JWT_SECRET;
+      delete process.env.JWT_ACCESS_SECRET;
+
+      expect(() => new ConfigService()).toThrow(/Config validation error/);
+    });
+
+    it('JWT_REFRESH_SECRET이 누락될 때 오류를 발생시켜야 함', () => {
+      setupEnvVariables();
+      delete process.env.JWT_REFRESH_SECRET;
 
       expect(() => new ConfigService()).toThrow(/Config validation error/);
     });
@@ -139,7 +149,8 @@ describe('ConfigService', () => {
     it('API_PORT를 숫자로 변환해야 함', () => {
       process.env = {
         API_PORT: '4000',
-        JWT_SECRET: 'test-secret',
+        JWT_ACCESS_SECRET: 'test-access-secret',
+        JWT_REFRESH_SECRET: 'test-refresh-secret',
         JWT_EXPIRES_IN: '1h',
         DATABASE_URL: 'postgresql://user:password@localhost:5432/db',
       };

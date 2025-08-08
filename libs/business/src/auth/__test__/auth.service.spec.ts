@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockDeep, DeepMockProxy } from 'vitest-mock-extended';
 
 import { AuthService } from '@libs/business';
-import { PrismaService } from '@libs/infrastructure';
+import { PrismaService, ConfigService } from '@libs/infrastructure';
 import { CustomError, ERROR_CODES } from '@libs/utils';
 
 import {
@@ -25,10 +25,19 @@ describe('AuthService', () => {
   let service: AuthService;
   let prismaService: DeepMockProxy<PrismaService>;
   let jwtService: DeepMockProxy<JwtService>;
+  let configService: DeepMockProxy<ConfigService>;
 
   beforeEach(async () => {
     prismaService = mockDeep<PrismaService>();
     jwtService = mockDeep<JwtService>();
+    configService = mockDeep<ConfigService>();
+
+    // ConfigService mock 설정
+    configService.get.mockImplementation((key: string) => {
+      if (key === 'JWT_ACCESS_SECRET') return 'test-access-secret';
+      if (key === 'JWT_REFRESH_SECRET') return 'test-refresh-secret';
+      return 'mock-value';
+    });
 
     const module: TestingModule = await Test.createTestingModule({
       imports: [],
@@ -36,6 +45,7 @@ describe('AuthService', () => {
         AuthService,
         { provide: PrismaService, useValue: prismaService },
         { provide: JwtService, useValue: jwtService },
+        { provide: ConfigService, useValue: configService },
       ],
     }).compile();
 
