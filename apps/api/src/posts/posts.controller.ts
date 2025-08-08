@@ -17,6 +17,7 @@ import { PostService } from '@libs/business';
 
 import { CreatePostDto, UpdatePostDto, GetPostsQueryDto } from './dtos';
 import { AccessTokenGuard } from '../auth/guards';
+import { AuthorOwnershipGuard } from '@libs/utils';
 
 @Controller('posts')
 export class PostsController {
@@ -40,7 +41,7 @@ export class PostsController {
   }
 
   @Put(':id')
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessTokenGuard, AuthorOwnershipGuard)
   async updatePost(
     @Param('id', ParseIntPipe) id: number,
     @Body() updatePostDto: UpdatePostDto,
@@ -49,7 +50,7 @@ export class PostsController {
   }
 
   @Delete(':id')
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessTokenGuard, AuthorOwnershipGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deletePost(@Param('id', ParseIntPipe) id: number) {
     await this.postService.delete(id);

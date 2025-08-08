@@ -21,6 +21,7 @@ import {
   GetCommentsQueryDto,
 } from './dtos';
 import { AccessTokenGuard } from '../auth/guards';
+import { AuthorOwnershipGuard } from '@libs/utils';
 
 @Controller('comments')
 export class CommentsController {
@@ -50,7 +51,7 @@ export class CommentsController {
   }
 
   @Put(':id')
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessTokenGuard, AuthorOwnershipGuard)
   async updateComment(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCommentDto: UpdateCommentDto,
@@ -59,7 +60,7 @@ export class CommentsController {
   }
 
   @Delete(':id')
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessTokenGuard, AuthorOwnershipGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteComment(@Param('id', ParseIntPipe) id: number) {
     await this.commentService.delete(id);
