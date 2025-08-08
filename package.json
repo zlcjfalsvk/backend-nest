@@ -18,7 +18,11 @@
     "prisma:script": "prisma migrate dev --create-only",
     "prisma:migrate:postgresql": "npx prisma migrate dev --schema=./prisma/schema.prisma",
     "prisma:migrate:postgresql:deploy": "npx prisma migrate deploy --schema=./prisma/schema.prisma",
-    "test:unit": "vitest"
+    "test:unit": "vitest",
+    "lint": "eslint \"{apps,libs}/**/*.{js,ts}\" --report-unused-disable-directives --max-warnings 100",
+    "lint:fix": "eslint \"{apps,libs}/**/*.{js,ts}\" --fix",
+    "format": "prettier --write \"{apps,libs}/**/*.{js,ts,json,md}\"",
+    "format:check": "prettier --check \"{apps,libs}/**/*.{js,ts,json,md}\""
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

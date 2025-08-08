@@ -1,10 +1,14 @@
+import {
+  ExecutionContext,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { beforeEach, describe, expect, it, vi, afterEach } from 'vitest';
-import { ExecutionContext, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { DeepMockProxy, mockDeep } from 'vitest-mock-extended';
 
-import { PrismaService } from '@libs/infrastructure';
 import { Token, TokenType } from '@libs/business';
+import { PrismaService } from '@libs/infrastructure';
 
 import { AuthorOwnershipGuard } from '../author-ownership.guard';
 
@@ -172,7 +176,11 @@ describe('AuthorOwnershipGuard', () => {
 
   describe('에러 케이스', () => {
     it('사용자 정보가 없을 때 403 에러를 발생시켜야 한다', async () => {
-      executionContext = createMockExecutionContext('PostsController', { id: '1' }, null);
+      executionContext = createMockExecutionContext(
+        'PostsController',
+        { id: '1' },
+        null,
+      );
 
       await expect(guard.canActivate(executionContext)).rejects.toThrow(
         new ForbiddenException('User information is required'),
@@ -181,7 +189,11 @@ describe('AuthorOwnershipGuard', () => {
 
     it('사용자 ID가 없을 때 403 에러를 발생시켜야 한다', async () => {
       const userWithoutSub = { ...mockUser, sub: '' };
-      executionContext = createMockExecutionContext('PostsController', { id: '1' }, userWithoutSub);
+      executionContext = createMockExecutionContext(
+        'PostsController',
+        { id: '1' },
+        userWithoutSub,
+      );
 
       await expect(guard.canActivate(executionContext)).rejects.toThrow(
         new ForbiddenException('User information is required'),
@@ -189,7 +201,9 @@ describe('AuthorOwnershipGuard', () => {
     });
 
     it('유효하지 않은 리소스 ID일 때 403 에러를 발생시켜야 한다', async () => {
-      executionContext = createMockExecutionContext('PostsController', { id: 'invalid' });
+      executionContext = createMockExecutionContext('PostsController', {
+        id: 'invalid',
+      });
 
       await expect(guard.canActivate(executionContext)).rejects.toThrow(
         new ForbiddenException('Valid resource ID is required'),

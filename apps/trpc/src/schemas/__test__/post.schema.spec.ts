@@ -63,7 +63,9 @@ describe('게시글 스키마', () => {
       const result = createPostSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('제목은 200자 이하로 입력해주세요');
+        expect(result.error.issues[0].message).toBe(
+          '제목은 200자 이하로 입력해주세요',
+        );
       }
     });
 
@@ -93,7 +95,9 @@ describe('게시글 스키마', () => {
       const result = createPostSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('slug는 100자 이하로 입력해주세요');
+        expect(result.error.issues[0].message).toBe(
+          'slug는 100자 이하로 입력해주세요',
+        );
       }
     });
 

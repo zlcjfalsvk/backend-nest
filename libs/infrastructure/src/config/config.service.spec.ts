@@ -32,8 +32,10 @@ describe('ConfigService', () => {
 
   // 테스트용 환경 변수 설정 헬퍼 함수
   const setupEnvVariables = (config: Partial<EnvConfig> = {}) => {
-    process.env.JWT_ACCESS_SECRET = config.JWT_ACCESS_SECRET || 'test-access-secret';
-    process.env.JWT_REFRESH_SECRET = config.JWT_REFRESH_SECRET || 'test-refresh-secret';
+    process.env.JWT_ACCESS_SECRET =
+      config.JWT_ACCESS_SECRET || 'test-access-secret';
+    process.env.JWT_REFRESH_SECRET =
+      config.JWT_REFRESH_SECRET || 'test-refresh-secret';
     process.env.JWT_EXPIRES_IN = config.JWT_EXPIRES_IN || '1h';
     process.env.DATABASE_URL =
       config.DATABASE_URL || 'postgresql://user:password@localhost:5432/db';

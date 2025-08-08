@@ -30,7 +30,7 @@ export class AccessTokenGuard implements CanActivate {
 
       request['user'] = payload;
       return true;
-    } catch (_: any) {
+    } catch {
       throw new UnauthorizedException('Invalid access token');
     }
   }

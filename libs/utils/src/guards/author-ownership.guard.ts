@@ -7,8 +7,8 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 
-import { PrismaService } from '@libs/infrastructure';
 import { Token } from '@libs/business';
+import { PrismaService } from '@libs/infrastructure';
 
 @Injectable()
 export class AuthorOwnershipGuard implements CanActivate {
@@ -28,14 +28,18 @@ export class AuthorOwnershipGuard implements CanActivate {
     }
 
     const controllerClass = context.getClass();
-    const resourceType = this.getResourceTypeFromController(controllerClass.name);
+    const resourceType = this.getResourceTypeFromController(
+      controllerClass.name,
+    );
 
     await this.validateOwnership(user.sub, resourceId, resourceType);
 
     return true;
   }
 
-  private getResourceTypeFromController(controllerName: string): 'post' | 'comment' {
+  private getResourceTypeFromController(
+    controllerName: string,
+  ): 'post' | 'comment' {
     if (controllerName.toLowerCase().includes('post')) {
       return 'post';
     } else if (controllerName.toLowerCase().includes('comment')) {

@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 
 import { CommentService } from '@libs/business';
+import { AuthorOwnershipGuard } from '@libs/utils';
 
 import {
   CreateCommentDto,
@@ -21,7 +22,6 @@ import {
   GetCommentsQueryDto,
 } from './dtos';
 import { AccessTokenGuard } from '../auth/guards';
-import { AuthorOwnershipGuard } from '@libs/utils';
 
 @Controller('comments')
 export class CommentsController {

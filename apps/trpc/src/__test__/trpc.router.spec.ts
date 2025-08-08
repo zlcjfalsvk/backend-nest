@@ -89,19 +89,39 @@ describe('TrpcRouter', () => {
 
   describe('TrpcRouter 클래스 구조', () => {
     it('authRouter getter 메서드가 있어야 한다', () => {
-      expect(typeof Object.getOwnPropertyDescriptor(TrpcRouter.prototype, 'authRouter')?.get).toBe('function');
+      expect(
+        typeof Object.getOwnPropertyDescriptor(
+          TrpcRouter.prototype,
+          'authRouter',
+        )?.get,
+      ).toBe('function');
     });
 
     it('postRouter getter 메서드가 있어야 한다', () => {
-      expect(typeof Object.getOwnPropertyDescriptor(TrpcRouter.prototype, 'postRouter')?.get).toBe('function');
+      expect(
+        typeof Object.getOwnPropertyDescriptor(
+          TrpcRouter.prototype,
+          'postRouter',
+        )?.get,
+      ).toBe('function');
     });
 
     it('commentRouter getter 메서드가 있어야 한다', () => {
-      expect(typeof Object.getOwnPropertyDescriptor(TrpcRouter.prototype, 'commentRouter')?.get).toBe('function');
+      expect(
+        typeof Object.getOwnPropertyDescriptor(
+          TrpcRouter.prototype,
+          'commentRouter',
+        )?.get,
+      ).toBe('function');
     });
 
     it('appRouter getter 메서드가 있어야 한다', () => {
-      expect(typeof Object.getOwnPropertyDescriptor(TrpcRouter.prototype, 'appRouter')?.get).toBe('function');
+      expect(
+        typeof Object.getOwnPropertyDescriptor(
+          TrpcRouter.prototype,
+          'appRouter',
+        )?.get,
+      ).toBe('function');
     });
   });
 });

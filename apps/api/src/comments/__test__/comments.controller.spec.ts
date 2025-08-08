@@ -1,17 +1,17 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
+import { Test, TestingModule } from '@nestjs/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DeepMockProxy, mockDeep } from 'vitest-mock-extended';
 
 import { CommentService } from '@libs/business';
 
+import { AccessTokenGuard } from '../../auth/guards';
 import { CommentsController } from '../comments.controller';
 import {
   CreateCommentDto,
   UpdateCommentDto,
   GetCommentsQueryDto,
 } from '../dtos';
-import { AccessTokenGuard } from '../../auth/guards';
 
 describe('CommentsController', () => {
   let controller: CommentsController;

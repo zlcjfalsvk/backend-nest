@@ -44,7 +44,9 @@ describe('인증 스키마', () => {
       const result = signUpSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('유효한 이메일을 입력해주세요');
+        expect(result.error.issues[0].message).toBe(
+          '유효한 이메일을 입력해주세요',
+        );
       }
     });
 
@@ -71,7 +73,9 @@ describe('인증 스키마', () => {
       const result = signUpSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('닉네임은 20자 이하로 입력해주세요');
+        expect(result.error.issues[0].message).toBe(
+          '닉네임은 20자 이하로 입력해주세요',
+        );
       }
     });
 
@@ -86,7 +90,9 @@ describe('인증 스키마', () => {
       const result = signUpSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('비밀번호는 최소 8자 이상이어야 합니다');
+        expect(result.error.issues[0].message).toBe(
+          '비밀번호는 최소 8자 이상이어야 합니다',
+        );
       }
     });
 
@@ -147,7 +153,9 @@ describe('인증 스키마', () => {
       const result = signInSchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('유효한 이메일을 입력해주세요');
+        expect(result.error.issues[0].message).toBe(
+          '유효한 이메일을 입력해주세요',
+        );
       }
     });
 

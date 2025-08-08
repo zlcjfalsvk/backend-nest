@@ -14,10 +14,10 @@ import {
 } from '@nestjs/common';
 
 import { PostService } from '@libs/business';
+import { AuthorOwnershipGuard } from '@libs/utils';
 
 import { CreatePostDto, UpdatePostDto, GetPostsQueryDto } from './dtos';
 import { AccessTokenGuard } from '../auth/guards';
-import { AuthorOwnershipGuard } from '@libs/utils';
 
 @Controller('posts')
 export class PostsController {
