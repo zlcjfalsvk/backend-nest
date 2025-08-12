@@ -45,9 +45,19 @@ if [ -d "logs" ]; then
     rm -rf logs/e2e-results.json logs/playwright-* || print_warning "Failed to clean some log files"
 fi
 
-# Optional: Kill any running API servers on test ports
-print_status "Checking for any running processes on test ports..."
-lsof -ti:3000 | xargs -r kill -9 || true
-lsof -ti:5433 | xargs -r kill -9 || true
+# Kill API server if PID file exists
+if [ -f "/tmp/e2e-api.pid" ]; then
+    print_status "Stopping API server..."
+    API_PID=$(cat /tmp/e2e-api.pid)
+    kill $API_PID 2>/dev/null || true
+    rm /tmp/e2e-api.pid
+    sleep 2
+fi
+
+# Kill any remaining processes on test ports
+print_status "Ensuring all test ports are cleaned up..."
+lsof -ti:3000 | xargs -r kill -9 2>/dev/null || true
+lsof -ti:5433 | xargs -r kill -9 2>/dev/null || true
+sleep 1
 
 print_status "✅ E2E test environment teardown complete!"

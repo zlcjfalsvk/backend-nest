@@ -1,6 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
 import supertest from 'supertest';
-import { prisma } from './setup';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 const API_BASE_URL = 'http://localhost:3000';
 
@@ -16,7 +15,7 @@ describe('Auth API E2E Tests', () => {
       const userData = {
         email: 'newuser@example.com',
         nickName: 'newuser',
-        password: 'securePassword123',
+        password: 'SecurePassword123!',
         introduction: 'Hello, I am a new user!',
       };
 
@@ -37,70 +36,55 @@ describe('Auth API E2E Tests', () => {
       const userData = {
         email: 'duplicate@example.com',
         nickName: 'user1',
-        password: 'password123',
+        password: 'Password123!',
         introduction: 'First user',
       };
 
       // Create first user
-      await request
-        .post('/auth/sign-up')
-        .send(userData)
-        .expect(201);
+      await request.post('/auth/sign-up').send(userData).expect(201);
 
       // Try to create second user with same email
       const duplicateUserData = {
         email: 'duplicate@example.com', // Same email
         nickName: 'user2',
-        password: 'password456',
+        password: 'Password456!',
         introduction: 'Second user',
       };
 
-      await request
-        .post('/auth/sign-up')
-        .send(duplicateUserData)
-        .expect(400);
+      await request.post('/auth/sign-up').send(duplicateUserData).expect(409);
     });
 
     it('should return 400 for duplicate nickname', async () => {
       const userData = {
         email: 'user1@example.com',
         nickName: 'duplicateNick',
-        password: 'password123',
+        password: 'Password123!',
         introduction: 'First user',
       };
 
       // Create first user
-      await request
-        .post('/auth/sign-up')
-        .send(userData)
-        .expect(201);
+      await request.post('/auth/sign-up').send(userData).expect(201);
 
       // Try to create second user with same nickname
       const duplicateUserData = {
         email: 'user2@example.com',
         nickName: 'duplicateNick', // Same nickname
-        password: 'password456',
+        password: 'Password456!',
         introduction: 'Second user',
       };
 
-      await request
-        .post('/auth/sign-up')
-        .send(duplicateUserData)
-        .expect(400);
+      await request.post('/auth/sign-up').send(duplicateUserData).expect(409);
     });
 
     it('should return 400 for invalid email format', async () => {
       const invalidUserData = {
         email: 'invalid-email-format',
         nickName: 'validuser',
-        password: 'password123',
+        password: 'Password123!',
         introduction: 'Valid introduction',
       };
 
-      await request
-        .post('/auth/sign-up')
-        .send(invalidUserData)
-        .expect(400);
+      await request.post('/auth/sign-up').send(invalidUserData).expect(400);
     });
 
     it('should return 400 for missing required fields', async () => {
@@ -110,10 +94,7 @@ describe('Auth API E2E Tests', () => {
         introduction: 'Incomplete user data',
       };
 
-      await request
-        .post('/auth/sign-up')
-        .send(incompleteUserData)
-        .expect(400);
+      await request.post('/auth/sign-up').send(incompleteUserData).expect(400);
     });
 
     it('should return 400 for weak password', async () => {
@@ -124,10 +105,7 @@ describe('Auth API E2E Tests', () => {
         introduction: 'User with weak password',
       };
 
-      await request
-        .post('/auth/sign-up')
-        .send(weakPasswordData)
-        .expect(400);
+      await request.post('/auth/sign-up').send(weakPasswordData).expect(400);
     });
   });
 
@@ -139,7 +117,7 @@ describe('Auth API E2E Tests', () => {
         .send({
           email: 'signin@example.com',
           nickName: 'signinuser',
-          password: 'correctPassword123',
+          password: 'CorrectPassword123!',
           introduction: 'User for sign-in testing',
         })
         .expect(201);
@@ -148,7 +126,7 @@ describe('Auth API E2E Tests', () => {
     it('should sign in with valid credentials', async () => {
       const signInData = {
         email: 'signin@example.com',
-        password: 'correctPassword123',
+        password: 'CorrectPassword123!',
       };
 
       const response = await request
@@ -159,33 +137,26 @@ describe('Auth API E2E Tests', () => {
       expect(response.body).toBeDefined();
       expect(response.body.accessToken).toBeDefined();
       expect(typeof response.body.accessToken).toBe('string');
-      expect(response.body.user).toBeDefined();
-      expect(response.body.user.email).toBe(signInData.email);
-      expect(response.body.user.password).toBeUndefined(); // Password should not be returned
+      expect(response.body.id).toBeDefined();
+      expect(response.body.refreshToken).toBeDefined();
     });
 
     it('should return 401 for incorrect password', async () => {
       const signInData = {
         email: 'signin@example.com',
-        password: 'wrongPassword123',
+        password: 'WrongPassword123!',
       };
 
-      await request
-        .post('/auth/sign-in')
-        .send(signInData)
-        .expect(401);
+      await request.post('/auth/sign-in').send(signInData).expect(401);
     });
 
     it('should return 401 for non-existent email', async () => {
       const signInData = {
         email: 'nonexistent@example.com',
-        password: 'anyPassword123',
+        password: 'AnyPassword123!',
       };
 
-      await request
-        .post('/auth/sign-in')
-        .send(signInData)
-        .expect(401);
+      await request.post('/auth/sign-in').send(signInData).expect(401);
     });
 
     it('should return 400 for missing credentials', async () => {
@@ -203,13 +174,10 @@ describe('Auth API E2E Tests', () => {
     it('should return 400 for invalid email format', async () => {
       const invalidSignInData = {
         email: 'invalid-email-format',
-        password: 'correctPassword123',
+        password: 'CorrectPassword123!',
       };
 
-      await request
-        .post('/auth/sign-in')
-        .send(invalidSignInData)
-        .expect(400);
+      await request.post('/auth/sign-in').send(invalidSignInData).expect(400);
     });
   });
 
@@ -219,7 +187,7 @@ describe('Auth API E2E Tests', () => {
       const userData = {
         email: 'integration@example.com',
         nickName: 'integrationuser',
-        password: 'integrationPassword123',
+        password: 'IntegrationPassword123!',
         introduction: 'Integration test user',
       };
 

@@ -17,7 +17,7 @@ export default defineConfig({
     hookTimeout: 30000,
     teardownTimeout: 30000,
     include: ['**/*.e2e-spec.ts'],
-    exclude: ['node_modules', 'dist'],
+    exclude: ['node_modules', 'dist', 'apps/api/test'],
     globals: true,
     environment: 'node',
     setupFiles: ['tests/e2e/setup.ts'],

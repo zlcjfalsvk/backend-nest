@@ -21,7 +21,7 @@ async function seed() {
     console.log('✅ Existing test data cleaned');
 
     // Create test users
-    const hashedPassword = await argon2.hash('password123');
+    const hashedPassword = await argon2.hash('Password123!');
     
     const users = await Promise.all([
       prisma.user.create({
