@@ -12,6 +12,14 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# E2E Test artifacts
+logs/e2e-results.json
+logs/playwright-report/
+logs/playwright-results.json
+logs/playwright-artifacts/
+test-results/
+playwright-report/
+
 # OS
 .DS_Store
 
