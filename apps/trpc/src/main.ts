@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { JwtService } from '@nestjs/jwt';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
 
@@ -20,10 +21,34 @@ async function bootstrap() {
   // ConfigService 인스턴스 가져오기
   const configService = app.get(ConfigService);
 
+  // JwtService 인스턴스 가져오기
+  const jwtService = app.get(JwtService);
+
   // tRPC Express 미들웨어 생성
   const trpcMiddleware = createExpressMiddleware({
     router: trpcRouter.appRouter,
-    createContext: () => ({ user: undefined }), // 기본 컨텍스트
+    createContext: ({ req }) => {
+      try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+          return { user: undefined };
+        }
+
+        const token = authHeader.substring(7);
+        const payload = jwtService.verify(token, {
+          secret: configService.get('JWT_ACCESS_SECRET'),
+        });
+
+        return {
+          user: {
+            id: payload.sub,
+          },
+        };
+      } catch (error) {
+        // JWT 검증 실패 시 인증되지 않은 사용자로 처리
+        return { user: undefined };
+      }
+    },
   });
 
   // tRPC 미들웨어 등록

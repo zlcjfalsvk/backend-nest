@@ -5,8 +5,7 @@ import { inferAsyncReturnType } from '@trpc/server';
  */
 export interface TrpcContext {
   user?: {
-    id: number;
-    email: string;
+    id: string;
   };
 }
 

@@ -15,9 +15,11 @@ interface AuthUser {
 }
 
 interface Post {
-  id: string;
+  id: number;
   title: string;
   content: string;
+  slug: string;
+  published: boolean;
   authorId: string;
   createdAt: string;
   updatedAt: string;
@@ -93,7 +95,7 @@ describe('tRPC Comments E2E Tests', () => {
   describe('comment.getCommentsByPostId', () => {
     it('should return comments for a post with pagination', async () => {
       const result = await trpc.comment.getCommentsByPostId.query({
-        postId: testPost.id,
+        postId: Number(testPost.id),
         take: 10,
       });
 
@@ -102,7 +104,7 @@ describe('tRPC Comments E2E Tests', () => {
 
     it('should return empty result when no comments exist', async () => {
       const result = await trpc.comment.getCommentsByPostId.query({
-        postId: testPost.id,
+        postId: Number(testPost.id),
         take: 10,
       });
 
@@ -112,7 +114,7 @@ describe('tRPC Comments E2E Tests', () => {
 
     it('should handle different page sizes', async () => {
       const result = await trpc.comment.getCommentsByPostId.query({
-        postId: testPost.id,
+        postId: Number(testPost.id),
         take: 5,
       });
 
@@ -124,7 +126,7 @@ describe('tRPC Comments E2E Tests', () => {
     it('should create a new comment with valid data', async () => {
       const commentData = {
         content: 'This is a test comment via tRPC',
-        postId: testPost.id,
+        postId: Number(testPost.id),
         authorId: testUser.id,
       };
 
@@ -143,7 +145,7 @@ describe('tRPC Comments E2E Tests', () => {
     it('should throw error when not authenticated', async () => {
       const commentData = {
         content: 'Unauthorized comment',
-        postId: testPost.id,
+        postId: Number(testPost.id),
         authorId: testUser.id,
       };
 
@@ -155,7 +157,7 @@ describe('tRPC Comments E2E Tests', () => {
     it('should throw error for invalid data', async () => {
       const invalidCommentData = {
         content: '', // Empty content
-        postId: testPost.id,
+        postId: Number(testPost.id),
         authorId: testUser.id,
       };
 
@@ -184,14 +186,14 @@ describe('tRPC Comments E2E Tests', () => {
       // Create a comment for testing
       createdComment = await authenticatedTrpc.comment.createComment.mutate({
         content: 'Test comment for retrieval',
-        postId: testPost.id,
+        postId: Number(testPost.id),
         authorId: testUser.id,
       });
     });
 
     it('should retrieve a comment by id', async () => {
       const comment = await trpc.comment.getComment.query({
-        id: createdComment.id,
+        id: Number(createdComment.id),
       });
 
       expect(comment).toBeDefined();
@@ -215,14 +217,14 @@ describe('tRPC Comments E2E Tests', () => {
       // Create a comment for testing
       createdComment = await authenticatedTrpc.comment.createComment.mutate({
         content: 'Original comment content',
-        postId: testPost.id,
+        postId: Number(testPost.id),
         authorId: testUser.id,
       });
     });
 
     it('should update a comment with valid data', async () => {
       const updateData = {
-        id: createdComment.id,
+        id: Number(createdComment.id),
         content: 'Updated comment content',
       };
 
@@ -241,7 +243,7 @@ describe('tRPC Comments E2E Tests', () => {
 
     it('should throw error when not authenticated', async () => {
       const updateData = {
-        id: createdComment.id,
+        id: Number(createdComment.id),
         content: 'Unauthorized update',
       };
 
@@ -269,25 +271,25 @@ describe('tRPC Comments E2E Tests', () => {
       // Create a comment for testing
       createdComment = await authenticatedTrpc.comment.createComment.mutate({
         content: 'Comment to delete',
-        postId: testPost.id,
+        postId: Number(testPost.id),
         authorId: testUser.id,
       });
     });
 
     it('should delete a comment', async () => {
       await authenticatedTrpc.comment.deleteComment.mutate({
-        id: createdComment.id,
+        id: Number(createdComment.id),
       });
 
       // Verify the comment is deleted
       await expect(
-        trpc.comment.getComment.query({ id: createdComment.id }),
+        trpc.comment.getComment.query({ id: Number(createdComment.id) }),
       ).rejects.toThrow();
     });
 
     it('should throw error when not authenticated', async () => {
       await expect(
-        trpc.comment.deleteComment.mutate({ id: createdComment.id }),
+        trpc.comment.deleteComment.mutate({ id: Number(createdComment.id) }),
       ).rejects.toThrow();
     });
 
@@ -303,7 +305,7 @@ describe('tRPC Comments E2E Tests', () => {
       // Create
       const commentData = {
         content: 'CRUD test comment',
-        postId: testPost.id,
+        postId: Number(testPost.id),
         authorId: testUser.id,
       };
 
@@ -313,13 +315,13 @@ describe('tRPC Comments E2E Tests', () => {
 
       // Read
       const retrievedComment = await trpc.comment.getComment.query({
-        id: createdComment.id,
+        id: Number(createdComment.id),
       });
       expect(retrievedComment.id).toBe(createdComment.id);
 
       // Update
       const updateData = {
-        id: createdComment.id,
+        id: Number(createdComment.id),
         content: 'Updated CRUD test comment',
       };
 
@@ -329,12 +331,12 @@ describe('tRPC Comments E2E Tests', () => {
 
       // Delete
       await authenticatedTrpc.comment.deleteComment.mutate({
-        id: createdComment.id,
+        id: Number(createdComment.id),
       });
 
       // Verify deletion
       await expect(
-        trpc.comment.getComment.query({ id: createdComment.id }),
+        trpc.comment.getComment.query({ id: Number(createdComment.id) }),
       ).rejects.toThrow();
     });
 
@@ -342,19 +344,19 @@ describe('tRPC Comments E2E Tests', () => {
       // Create multiple comments
       const comment1 = await authenticatedTrpc.comment.createComment.mutate({
         content: 'First comment',
-        postId: testPost.id,
+        postId: Number(testPost.id),
         authorId: testUser.id,
       });
 
       const comment2 = await authenticatedTrpc.comment.createComment.mutate({
         content: 'Second comment',
-        postId: testPost.id,
+        postId: Number(testPost.id),
         authorId: testUser.id,
       });
 
       // List comments for the post
       const result = await trpc.comment.getCommentsByPostId.query({
-        postId: testPost.id,
+        postId: Number(testPost.id),
         take: 10,
       });
 

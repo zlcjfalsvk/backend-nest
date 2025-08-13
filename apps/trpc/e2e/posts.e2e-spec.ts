@@ -170,7 +170,7 @@ describe('tRPC Posts E2E Tests', () => {
     });
 
     it('should retrieve a post by id', async () => {
-      const post = await trpc.post.getPost.query({ id: createdPost.id });
+      const post = await trpc.post.getPost.query({ id: Number(createdPost.id) });
 
       expect(post).toBeDefined();
       expect(post.id).toBe(createdPost.id);
@@ -200,7 +200,7 @@ describe('tRPC Posts E2E Tests', () => {
 
     it('should update a post with valid data', async () => {
       const updateData = {
-        id: createdPost.id,
+        id: Number(createdPost.id),
         title: 'Updated Title',
         content: 'Updated content',
       };
@@ -220,7 +220,7 @@ describe('tRPC Posts E2E Tests', () => {
 
     it('should throw error when not authenticated', async () => {
       const updateData = {
-        id: createdPost.id,
+        id: Number(createdPost.id),
         title: 'Unauthorized Update',
         content: 'This should fail',
       };
@@ -256,17 +256,17 @@ describe('tRPC Posts E2E Tests', () => {
     });
 
     it('should delete a post', async () => {
-      await authenticatedTrpc.post.deletePost.mutate({ id: createdPost.id });
+      await authenticatedTrpc.post.deletePost.mutate({ id: Number(createdPost.id) });
 
       // Verify the post is deleted
       await expect(
-        trpc.post.getPost.query({ id: createdPost.id }),
+        trpc.post.getPost.query({ id: Number(createdPost.id) }),
       ).rejects.toThrow();
     });
 
     it('should throw error when not authenticated', async () => {
       await expect(
-        trpc.post.deletePost.mutate({ id: createdPost.id }),
+        trpc.post.deletePost.mutate({ id: Number(createdPost.id) }),
       ).rejects.toThrow();
     });
 
@@ -294,13 +294,13 @@ describe('tRPC Posts E2E Tests', () => {
 
       // Read
       const retrievedPost = await trpc.post.getPost.query({
-        id: createdPost.id,
+        id: Number(createdPost.id),
       });
       expect(retrievedPost.id).toBe(createdPost.id);
 
       // Update
       const updateData = {
-        id: createdPost.id,
+        id: Number(createdPost.id),
         title: 'Updated CRUD Test Post',
         content: 'Updated content for CRUD test',
       };
@@ -311,11 +311,11 @@ describe('tRPC Posts E2E Tests', () => {
       expect(updatedPost.content).toBe(updateData.content);
 
       // Delete
-      await authenticatedTrpc.post.deletePost.mutate({ id: createdPost.id });
+      await authenticatedTrpc.post.deletePost.mutate({ id: Number(createdPost.id) });
 
       // Verify deletion
       await expect(
-        trpc.post.getPost.query({ id: createdPost.id }),
+        trpc.post.getPost.query({ id: Number(createdPost.id) }),
       ).rejects.toThrow();
     });
   });
