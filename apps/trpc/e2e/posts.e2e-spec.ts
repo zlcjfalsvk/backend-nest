@@ -14,12 +14,6 @@ interface AuthUser {
   updatedAt: string;
 }
 
-interface SignInResponse {
-  id: string;
-  accessToken: string;
-  refreshToken: string;
-}
-
 interface Post {
   id: number;
   title: string;
@@ -170,7 +164,9 @@ describe('tRPC Posts E2E Tests', () => {
     });
 
     it('should retrieve a post by id', async () => {
-      const post = await trpc.post.getPost.query({ id: Number(createdPost.id) });
+      const post = await trpc.post.getPost.query({
+        id: Number(createdPost.id),
+      });
 
       expect(post).toBeDefined();
       expect(post.id).toBe(createdPost.id);
@@ -256,7 +252,9 @@ describe('tRPC Posts E2E Tests', () => {
     });
 
     it('should delete a post', async () => {
-      await authenticatedTrpc.post.deletePost.mutate({ id: Number(createdPost.id) });
+      await authenticatedTrpc.post.deletePost.mutate({
+        id: Number(createdPost.id),
+      });
 
       // Verify the post is deleted
       await expect(
@@ -311,7 +309,9 @@ describe('tRPC Posts E2E Tests', () => {
       expect(updatedPost.content).toBe(updateData.content);
 
       // Delete
-      await authenticatedTrpc.post.deletePost.mutate({ id: Number(createdPost.id) });
+      await authenticatedTrpc.post.deletePost.mutate({
+        id: Number(createdPost.id),
+      });
 
       // Verify deletion
       await expect(

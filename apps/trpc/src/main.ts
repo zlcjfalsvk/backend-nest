@@ -8,6 +8,13 @@ import { ConfigService } from '@libs/infrastructure';
 import { TrpcModule } from './trpc.module';
 import { TrpcRouter } from './trpc.router';
 
+interface JwtPayload {
+  sub: string;
+  type: string;
+  iat: number;
+  exp: number;
+}
+
 async function bootstrap() {
   // NestJS 애플리케이션 생성 (Express 어댑터 사용)
   const app = await NestFactory.create<NestExpressApplication>(TrpcModule);
@@ -35,7 +42,7 @@ async function bootstrap() {
         }
 
         const token = authHeader.substring(7);
-        const payload = jwtService.verify(token, {
+        const payload = jwtService.verify<JwtPayload>(token, {
           secret: configService.get('JWT_ACCESS_SECRET'),
         });
 
@@ -44,7 +51,7 @@ async function bootstrap() {
             id: payload.sub,
           },
         };
-      } catch (error) {
+      } catch {
         // JWT 검증 실패 시 인증되지 않은 사용자로 처리
         return { user: undefined };
       }

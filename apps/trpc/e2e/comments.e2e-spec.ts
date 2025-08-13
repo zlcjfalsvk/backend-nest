@@ -342,13 +342,13 @@ describe('tRPC Comments E2E Tests', () => {
 
     it('should list comments for a post after creating some', async () => {
       // Create multiple comments
-      const comment1 = await authenticatedTrpc.comment.createComment.mutate({
+      await authenticatedTrpc.comment.createComment.mutate({
         content: 'First comment',
         postId: Number(testPost.id),
         authorId: testUser.id,
       });
 
-      const comment2 = await authenticatedTrpc.comment.createComment.mutate({
+      await authenticatedTrpc.comment.createComment.mutate({
         content: 'Second comment',
         postId: Number(testPost.id),
         authorId: testUser.id,

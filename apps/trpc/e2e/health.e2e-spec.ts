@@ -30,11 +30,13 @@ describe('tRPC Health Check E2E Tests', () => {
 
       // If we get here, the server is responding
       expect(true).toBe(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
       // If it's a network error, the server is not running
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       if (
-        error.message?.includes('fetch') ||
-        error.message?.includes('ECONNREFUSED')
+        errorMessage?.includes('fetch') ||
+        errorMessage?.includes('ECONNREFUSED')
       ) {
         throw new Error('tRPC server is not running or not accessible');
       }

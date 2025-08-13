@@ -5,21 +5,6 @@ import type { AppRouter } from '../src/trpc.router';
 
 const TRPC_BASE_URL = 'http://localhost:3001/trpc';
 
-interface AuthUser {
-  id: string;
-  email: string;
-  nickName: string;
-  introduction: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface SignInResponse {
-  id: string;
-  accessToken: string;
-  refreshToken: string;
-}
-
 describe('tRPC Auth E2E Tests', () => {
   let trpc: ReturnType<typeof createTRPCClient<AppRouter>>;
 
@@ -49,7 +34,7 @@ describe('tRPC Auth E2E Tests', () => {
       expect(user.email).toBe(userData.email);
       expect(user.nickName).toBe(userData.nickName);
       expect(user.introduction).toBe(userData.introduction);
-      expect((user as any).password).toBeUndefined(); // Password should not be returned
+      expect('password' in user).toBe(false); // Password should not be returned
     });
 
     it('should throw error for duplicate email', async () => {
@@ -116,7 +101,7 @@ describe('tRPC Auth E2E Tests', () => {
         email: 'trpc-incomplete@example.com',
         // Missing nickName and password
         introduction: 'Incomplete user data',
-      } as any;
+      } as unknown;
 
       await expect(
         trpc.auth.signUp.mutate(incompleteUserData),
@@ -183,7 +168,7 @@ describe('tRPC Auth E2E Tests', () => {
       const incompleteSignInData = {
         email: 'trpc-signin@example.com',
         // Missing password
-      } as any;
+      } as unknown;
 
       await expect(
         trpc.auth.signIn.mutate(incompleteSignInData),
