@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
 
 // 환경 변수 타입 정의, 나중에 추가할 수 있음
-export type ServerType = 'api' | 'trpc';
+export type ServerType = 'api' | 'trpc' | 'admin' | 'worker';
 
 export interface EnvConfig {
   // 서버
   API_PORT: number;
   TRPC_PORT: number;
+  ADMIN_PORT: number;
+  WORKER_PORT: number;
 
   // JWT
   JWT_ACCESS_SECRET: string;
@@ -47,6 +49,14 @@ export class ConfigService {
       }),
       trpc: z.object({
         TRPC_PORT: z.coerce.number().default(3001),
+        ...baseSchema,
+      }),
+      admin: z.object({
+        ADMIN_PORT: z.coerce.number().default(3002),
+        ...baseSchema,
+      }),
+      worker: z.object({
+        WORKER_PORT: z.coerce.number().default(3003),
         ...baseSchema,
       }),
     };

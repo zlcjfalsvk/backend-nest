@@ -50,7 +50,9 @@ export class HttpFilter implements ExceptionFilter {
 
     // Add error code to response body for CustomError
     const enhancedResponseBody = {
-      ...(typeof responseBody === 'object' ? responseBody : { message: responseBody }),
+      ...(typeof responseBody === 'object'
+        ? responseBody
+        : { message: responseBody }),
       code: exception.code,
     };
 
