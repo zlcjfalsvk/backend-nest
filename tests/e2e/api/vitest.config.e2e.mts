@@ -26,8 +26,7 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     setupFiles: ['tests/e2e/setup.ts'],
-    globalSetup: ['tests/e2e/api/global-setup.ts'],
-    globalTeardown: ['tests/e2e/api/global-teardown.ts'],
+    globalSetup: 'tests/e2e/api/global-setup.ts',
     pool: 'forks',
     poolOptions: {
       forks: {
@@ -35,9 +34,10 @@ export default defineConfig({
       },
     },
     coverage: {
+      provider: 'v8',
       enabled: false,
     },
-    reporter: ['verbose', 'json'],
+    reporters: ['verbose', 'json'],
     outputFile: {
       json: 'logs/api-e2e-results.json',
     },
