@@ -1,7 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
-import * as cors from 'cors';
 
 import { ConfigService } from '@libs/infrastructure';
 
@@ -13,7 +12,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(TrpcModule);
 
   // CORS 설정
-  app.use(cors({ origin: true }));
+  app.enableCors({ origin: true });
 
   // tRPC 라우터 인스턴스 가져오기
   const trpcRouter = app.get(TrpcRouter);

@@ -1,5 +1,6 @@
 import { beforeAll, afterAll, beforeEach } from 'vitest';
-import { PrismaClient } from '../../prisma/prisma-clients';
+
+import { PrismaClient } from '@prisma-client';
 
 let prisma: PrismaClient;
 
@@ -8,11 +9,13 @@ beforeAll(async () => {
   prisma = new PrismaClient({
     datasources: {
       db: {
-        url: process.env.DATABASE_URL || 'postgresql://testuser:testpass@localhost:5433/testdb',
+        url:
+          process.env.DATABASE_URL ||
+          'postgresql://testuser:testpass@localhost:5433/testdb',
       },
     },
   });
-  
+
   await prisma.$connect();
 });
 
