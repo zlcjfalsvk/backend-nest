@@ -1,4 +1,5 @@
 import supertest from 'supertest';
+import TestAgent from 'supertest/lib/agent';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 interface AuthUser {
@@ -19,7 +20,7 @@ interface SignInResponse {
 const API_BASE_URL = 'http://localhost:3000';
 
 describe('Auth API E2E Tests', () => {
-  let request: supertest.SuperTest<supertest.Test>;
+  let request: TestAgent<supertest.Test>;
 
   beforeEach(() => {
     request = supertest(API_BASE_URL);

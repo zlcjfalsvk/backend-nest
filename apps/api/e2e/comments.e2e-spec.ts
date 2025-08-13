@@ -1,4 +1,5 @@
 import supertest from 'supertest';
+import TestAgent from 'supertest/lib/agent';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { prisma } from '../../../tests/e2e/setup';
@@ -40,11 +41,23 @@ interface CommentsResponse {
 const API_BASE_URL = 'http://localhost:3000';
 
 describe('Comments API E2E Tests', () => {
-  let request: supertest.SuperTest<supertest.Test>;
+  let request: TestAgent<supertest.Test>;
   let authToken: string;
   let testUser: AuthUser;
-  let testPost: { id: number; title: string; content: string; slug: string; published: boolean; authorId: string };
-  let testComment: { id: number; content: string; postId: number; authorId: string };
+  let testPost: {
+    id: number;
+    title: string;
+    content: string;
+    slug: string;
+    published: boolean;
+    authorId: string;
+  };
+  let testComment: {
+    id: number;
+    content: string;
+    postId: number;
+    authorId: string;
+  };
 
   beforeEach(async () => {
     request = supertest(API_BASE_URL);
