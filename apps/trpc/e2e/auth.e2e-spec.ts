@@ -71,7 +71,9 @@ describe('tRPC Auth E2E Tests', () => {
         introduction: 'Second user',
       };
 
-      await expect(trpc.auth.signUp.mutate(duplicateUserData)).rejects.toThrow();
+      await expect(
+        trpc.auth.signUp.mutate(duplicateUserData),
+      ).rejects.toThrow();
     });
 
     it('should throw error for duplicate nickname', async () => {
@@ -93,7 +95,9 @@ describe('tRPC Auth E2E Tests', () => {
         introduction: 'Second user',
       };
 
-      await expect(trpc.auth.signUp.mutate(duplicateUserData)).rejects.toThrow();
+      await expect(
+        trpc.auth.signUp.mutate(duplicateUserData),
+      ).rejects.toThrow();
     });
 
     it('should throw error for invalid email format', async () => {
@@ -114,7 +118,9 @@ describe('tRPC Auth E2E Tests', () => {
         introduction: 'Incomplete user data',
       } as any;
 
-      await expect(trpc.auth.signUp.mutate(incompleteUserData)).rejects.toThrow();
+      await expect(
+        trpc.auth.signUp.mutate(incompleteUserData),
+      ).rejects.toThrow();
     });
 
     it('should throw error for weak password', async () => {
@@ -179,7 +185,9 @@ describe('tRPC Auth E2E Tests', () => {
         // Missing password
       } as any;
 
-      await expect(trpc.auth.signIn.mutate(incompleteSignInData)).rejects.toThrow();
+      await expect(
+        trpc.auth.signIn.mutate(incompleteSignInData),
+      ).rejects.toThrow();
     });
 
     it('should throw error for invalid email format', async () => {
@@ -188,7 +196,9 @@ describe('tRPC Auth E2E Tests', () => {
         password: 'CorrectPassword123!',
       };
 
-      await expect(trpc.auth.signIn.mutate(invalidSignInData)).rejects.toThrow();
+      await expect(
+        trpc.auth.signIn.mutate(invalidSignInData),
+      ).rejects.toThrow();
     });
   });
 

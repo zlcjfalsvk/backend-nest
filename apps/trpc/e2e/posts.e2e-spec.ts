@@ -149,7 +149,9 @@ describe('tRPC Posts E2E Tests', () => {
         authorId: testUser.id,
       };
 
-      await expect(authenticatedTrpc.post.createPost.mutate(invalidPostData)).rejects.toThrow();
+      await expect(
+        authenticatedTrpc.post.createPost.mutate(invalidPostData),
+      ).rejects.toThrow();
     });
   });
 
@@ -203,7 +205,8 @@ describe('tRPC Posts E2E Tests', () => {
         content: 'Updated content',
       };
 
-      const updatedPost = await authenticatedTrpc.post.updatePost.mutate(updateData);
+      const updatedPost =
+        await authenticatedTrpc.post.updatePost.mutate(updateData);
 
       expect(updatedPost).toBeDefined();
       expect(updatedPost.id).toBe(createdPost.id);
@@ -211,7 +214,7 @@ describe('tRPC Posts E2E Tests', () => {
       expect(updatedPost.content).toBe(updateData.content);
       expect(updatedPost.authorId).toBe(createdPost.authorId);
       expect(new Date(updatedPost.updatedAt).getTime()).toBeGreaterThan(
-        new Date(createdPost.updatedAt).getTime()
+        new Date(createdPost.updatedAt).getTime(),
       );
     });
 
@@ -232,7 +235,9 @@ describe('tRPC Posts E2E Tests', () => {
         content: 'Updated content',
       };
 
-      await expect(authenticatedTrpc.post.updatePost.mutate(updateData)).rejects.toThrow();
+      await expect(
+        authenticatedTrpc.post.updatePost.mutate(updateData),
+      ).rejects.toThrow();
     });
   });
 
@@ -254,15 +259,21 @@ describe('tRPC Posts E2E Tests', () => {
       await authenticatedTrpc.post.deletePost.mutate({ id: createdPost.id });
 
       // Verify the post is deleted
-      await expect(trpc.post.getPost.query({ id: createdPost.id })).rejects.toThrow();
+      await expect(
+        trpc.post.getPost.query({ id: createdPost.id }),
+      ).rejects.toThrow();
     });
 
     it('should throw error when not authenticated', async () => {
-      await expect(trpc.post.deletePost.mutate({ id: createdPost.id })).rejects.toThrow();
+      await expect(
+        trpc.post.deletePost.mutate({ id: createdPost.id }),
+      ).rejects.toThrow();
     });
 
     it('should throw error for non-existent post', async () => {
-      await expect(authenticatedTrpc.post.deletePost.mutate({ id: 999999 })).rejects.toThrow();
+      await expect(
+        authenticatedTrpc.post.deletePost.mutate({ id: 999999 }),
+      ).rejects.toThrow();
     });
   });
 
@@ -277,11 +288,14 @@ describe('tRPC Posts E2E Tests', () => {
         authorId: testUser.id,
       };
 
-      const createdPost = await authenticatedTrpc.post.createPost.mutate(postData);
+      const createdPost =
+        await authenticatedTrpc.post.createPost.mutate(postData);
       expect(createdPost.title).toBe(postData.title);
 
       // Read
-      const retrievedPost = await trpc.post.getPost.query({ id: createdPost.id });
+      const retrievedPost = await trpc.post.getPost.query({
+        id: createdPost.id,
+      });
       expect(retrievedPost.id).toBe(createdPost.id);
 
       // Update
@@ -291,7 +305,8 @@ describe('tRPC Posts E2E Tests', () => {
         content: 'Updated content for CRUD test',
       };
 
-      const updatedPost = await authenticatedTrpc.post.updatePost.mutate(updateData);
+      const updatedPost =
+        await authenticatedTrpc.post.updatePost.mutate(updateData);
       expect(updatedPost.title).toBe(updateData.title);
       expect(updatedPost.content).toBe(updateData.content);
 
@@ -299,7 +314,9 @@ describe('tRPC Posts E2E Tests', () => {
       await authenticatedTrpc.post.deletePost.mutate({ id: createdPost.id });
 
       // Verify deletion
-      await expect(trpc.post.getPost.query({ id: createdPost.id })).rejects.toThrow();
+      await expect(
+        trpc.post.getPost.query({ id: createdPost.id }),
+      ).rejects.toThrow();
     });
   });
 });

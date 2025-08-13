@@ -27,15 +27,18 @@ describe('tRPC Health Check E2E Tests', () => {
         take: 1,
         onlyPublished: true,
       });
-      
+
       // If we get here, the server is responding
       expect(true).toBe(true);
     } catch (error: any) {
       // If it's a network error, the server is not running
-      if (error.message?.includes('fetch') || error.message?.includes('ECONNREFUSED')) {
+      if (
+        error.message?.includes('fetch') ||
+        error.message?.includes('ECONNREFUSED')
+      ) {
         throw new Error('tRPC server is not running or not accessible');
       }
-      
+
       // Other errors are acceptable (e.g., validation errors, business logic errors)
       // as they indicate the server is running and responding
       expect(true).toBe(true);

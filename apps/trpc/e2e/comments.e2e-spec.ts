@@ -128,7 +128,8 @@ describe('tRPC Comments E2E Tests', () => {
         authorId: testUser.id,
       };
 
-      const comment = await authenticatedTrpc.comment.createComment.mutate(commentData);
+      const comment =
+        await authenticatedTrpc.comment.createComment.mutate(commentData);
 
       expect(comment).toBeDefined();
       expect(comment.id).toBeDefined();
@@ -146,7 +147,9 @@ describe('tRPC Comments E2E Tests', () => {
         authorId: testUser.id,
       };
 
-      await expect(trpc.comment.createComment.mutate(commentData)).rejects.toThrow();
+      await expect(
+        trpc.comment.createComment.mutate(commentData),
+      ).rejects.toThrow();
     });
 
     it('should throw error for invalid data', async () => {
@@ -156,7 +159,9 @@ describe('tRPC Comments E2E Tests', () => {
         authorId: testUser.id,
       };
 
-      await expect(authenticatedTrpc.comment.createComment.mutate(invalidCommentData)).rejects.toThrow();
+      await expect(
+        authenticatedTrpc.comment.createComment.mutate(invalidCommentData),
+      ).rejects.toThrow();
     });
 
     it('should throw error for non-existent post', async () => {
@@ -166,7 +171,9 @@ describe('tRPC Comments E2E Tests', () => {
         authorId: testUser.id,
       };
 
-      await expect(authenticatedTrpc.comment.createComment.mutate(commentData)).rejects.toThrow();
+      await expect(
+        authenticatedTrpc.comment.createComment.mutate(commentData),
+      ).rejects.toThrow();
     });
   });
 
@@ -183,7 +190,9 @@ describe('tRPC Comments E2E Tests', () => {
     });
 
     it('should retrieve a comment by id', async () => {
-      const comment = await trpc.comment.getComment.query({ id: createdComment.id });
+      const comment = await trpc.comment.getComment.query({
+        id: createdComment.id,
+      });
 
       expect(comment).toBeDefined();
       expect(comment.id).toBe(createdComment.id);
@@ -193,7 +202,9 @@ describe('tRPC Comments E2E Tests', () => {
     });
 
     it('should throw error for non-existent comment', async () => {
-      await expect(trpc.comment.getComment.query({ id: 999999 })).rejects.toThrow();
+      await expect(
+        trpc.comment.getComment.query({ id: 999999 }),
+      ).rejects.toThrow();
     });
   });
 
@@ -215,7 +226,8 @@ describe('tRPC Comments E2E Tests', () => {
         content: 'Updated comment content',
       };
 
-      const updatedComment = await authenticatedTrpc.comment.updateComment.mutate(updateData);
+      const updatedComment =
+        await authenticatedTrpc.comment.updateComment.mutate(updateData);
 
       expect(updatedComment).toBeDefined();
       expect(updatedComment.id).toBe(createdComment.id);
@@ -223,7 +235,7 @@ describe('tRPC Comments E2E Tests', () => {
       expect(updatedComment.postId).toBe(createdComment.postId);
       expect(updatedComment.authorId).toBe(createdComment.authorId);
       expect(new Date(updatedComment.updatedAt).getTime()).toBeGreaterThan(
-        new Date(createdComment.updatedAt).getTime()
+        new Date(createdComment.updatedAt).getTime(),
       );
     });
 
@@ -233,7 +245,9 @@ describe('tRPC Comments E2E Tests', () => {
         content: 'Unauthorized update',
       };
 
-      await expect(trpc.comment.updateComment.mutate(updateData)).rejects.toThrow();
+      await expect(
+        trpc.comment.updateComment.mutate(updateData),
+      ).rejects.toThrow();
     });
 
     it('should throw error for non-existent comment', async () => {
@@ -242,7 +256,9 @@ describe('tRPC Comments E2E Tests', () => {
         content: 'Updated content',
       };
 
-      await expect(authenticatedTrpc.comment.updateComment.mutate(updateData)).rejects.toThrow();
+      await expect(
+        authenticatedTrpc.comment.updateComment.mutate(updateData),
+      ).rejects.toThrow();
     });
   });
 
@@ -259,18 +275,26 @@ describe('tRPC Comments E2E Tests', () => {
     });
 
     it('should delete a comment', async () => {
-      await authenticatedTrpc.comment.deleteComment.mutate({ id: createdComment.id });
+      await authenticatedTrpc.comment.deleteComment.mutate({
+        id: createdComment.id,
+      });
 
       // Verify the comment is deleted
-      await expect(trpc.comment.getComment.query({ id: createdComment.id })).rejects.toThrow();
+      await expect(
+        trpc.comment.getComment.query({ id: createdComment.id }),
+      ).rejects.toThrow();
     });
 
     it('should throw error when not authenticated', async () => {
-      await expect(trpc.comment.deleteComment.mutate({ id: createdComment.id })).rejects.toThrow();
+      await expect(
+        trpc.comment.deleteComment.mutate({ id: createdComment.id }),
+      ).rejects.toThrow();
     });
 
     it('should throw error for non-existent comment', async () => {
-      await expect(authenticatedTrpc.comment.deleteComment.mutate({ id: 999999 })).rejects.toThrow();
+      await expect(
+        authenticatedTrpc.comment.deleteComment.mutate({ id: 999999 }),
+      ).rejects.toThrow();
     });
   });
 
@@ -283,11 +307,14 @@ describe('tRPC Comments E2E Tests', () => {
         authorId: testUser.id,
       };
 
-      const createdComment = await authenticatedTrpc.comment.createComment.mutate(commentData);
+      const createdComment =
+        await authenticatedTrpc.comment.createComment.mutate(commentData);
       expect(createdComment.content).toBe(commentData.content);
 
       // Read
-      const retrievedComment = await trpc.comment.getComment.query({ id: createdComment.id });
+      const retrievedComment = await trpc.comment.getComment.query({
+        id: createdComment.id,
+      });
       expect(retrievedComment.id).toBe(createdComment.id);
 
       // Update
@@ -296,14 +323,19 @@ describe('tRPC Comments E2E Tests', () => {
         content: 'Updated CRUD test comment',
       };
 
-      const updatedComment = await authenticatedTrpc.comment.updateComment.mutate(updateData);
+      const updatedComment =
+        await authenticatedTrpc.comment.updateComment.mutate(updateData);
       expect(updatedComment.content).toBe(updateData.content);
 
       // Delete
-      await authenticatedTrpc.comment.deleteComment.mutate({ id: createdComment.id });
+      await authenticatedTrpc.comment.deleteComment.mutate({
+        id: createdComment.id,
+      });
 
       // Verify deletion
-      await expect(trpc.comment.getComment.query({ id: createdComment.id })).rejects.toThrow();
+      await expect(
+        trpc.comment.getComment.query({ id: createdComment.id }),
+      ).rejects.toThrow();
     });
 
     it('should list comments for a post after creating some', async () => {
