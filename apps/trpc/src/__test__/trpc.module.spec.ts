@@ -20,7 +20,14 @@ vi.mock('@libs/business', () => ({
 
 vi.mock('@libs/infrastructure', () => ({
   PrismaModule: vi.fn(),
-  ConfigModule: vi.fn(),
+  ConfigModule: {
+    forRoot: vi.fn(() => ({
+      global: true,
+      module: class MockConfigModule {},
+      providers: [{ provide: 'ConfigService', useValue: {} }],
+      exports: ['ConfigService'],
+    })),
+  },
 }));
 
 vi.mock('../trpc.router', () => ({
@@ -70,11 +77,24 @@ describe('TrpcModule', () => {
         CommentModule,
         PostModule,
         PrismaModule,
-        ConfigModule,
+        ConfigModule.forRoot('trpc'),
       ],
       providers: [TrpcRouter],
       exports: [TrpcRouter],
-    }).compile();
+    })
+      .overrideModule(TrpcAdapterModule)
+      .useModule(class MockTrpcAdapterModule {})
+      .overrideModule(AuthModule)
+      .useModule(class MockAuthModule {})
+      .overrideModule(CommentModule)
+      .useModule(class MockCommentModule {})
+      .overrideModule(PostModule)
+      .useModule(class MockPostModule {})
+      .overrideModule(PrismaModule)
+      .useModule(class MockPrismaModule {})
+      .overrideProvider(TrpcRouter)
+      .useValue({})
+      .compile();
 
     expect(moduleRef).toBeDefined();
   });

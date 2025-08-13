@@ -6,6 +6,7 @@ import { DeepMockProxy, mockDeep } from 'vitest-mock-extended';
 import { Token, TokenType } from '@libs/business';
 import { PrismaService } from '@libs/infrastructure';
 
+import { CustomError } from '../../custom-error';
 import { AuthorOwnershipGuard } from '../author-ownership.guard';
 
 describe('AuthorOwnershipGuard', () => {
@@ -98,7 +99,7 @@ describe('AuthorOwnershipGuard', () => {
       prismaService.post.findUnique.mockResolvedValue(null);
 
       await expect(guard.canActivate(executionContext)).rejects.toThrow(
-        new NotFoundException('Post with ID 1 not found'),
+        new CustomError('POST_NOT_FOUND', 'Post with ID 1 not found'),
       );
     });
 
@@ -111,7 +112,7 @@ describe('AuthorOwnershipGuard', () => {
       } as any);
 
       await expect(guard.canActivate(executionContext)).rejects.toThrow(
-        new NotFoundException('Post has been deleted'),
+        new CustomError('POST_DELETED', 'Post has been deleted'),
       );
     });
   });
@@ -152,7 +153,7 @@ describe('AuthorOwnershipGuard', () => {
       prismaService.comment.findUnique.mockResolvedValue(null);
 
       await expect(guard.canActivate(executionContext)).rejects.toThrow(
-        new NotFoundException('Comment with ID 1 not found'),
+        new CustomError('COMMENT_NOT_FOUND', 'Comment with ID 1 not found'),
       );
     });
 
@@ -165,7 +166,7 @@ describe('AuthorOwnershipGuard', () => {
       } as any);
 
       await expect(guard.canActivate(executionContext)).rejects.toThrow(
-        new NotFoundException('Comment has been deleted'),
+        new CustomError('COMMENT_DELETED', 'Comment has been deleted'),
       );
     });
   });
