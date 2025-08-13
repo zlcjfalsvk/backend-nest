@@ -33,18 +33,22 @@ export class ConfigService {
   }
 
   private validateEnvVariables(env: NodeJS.ProcessEnv): EnvConfig {
-    const baseSchema = z.object({
-      API_PORT: z.coerce.number().default(3000),
-      TRPC_PORT: z.coerce.number().default(3001),
+    const baseSchema = {
       JWT_ACCESS_SECRET: z.string().min(1, 'JWT_ACCESS_SECRET is required'),
       JWT_REFRESH_SECRET: z.string().min(1, 'JWT_REFRESH_SECRET is required'),
       JWT_EXPIRES_IN: z.string().min(1, 'JWT_EXPIRES_IN is required'),
       DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
-    });
+    };
 
     const serverSchemas: Record<ServerType, z.ZodSchema<any>> = {
-      api: baseSchema,
-      trpc: baseSchema,
+      api: z.object({
+        API_PORT: z.coerce.number().default(3000),
+        ...baseSchema,
+      }),
+      trpc: z.object({
+        TRPC_PORT: z.coerce.number().default(3001),
+        ...baseSchema,
+      }),
     };
 
     // 현재 서버 타입에 대한 스키마 가져오기
