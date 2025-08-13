@@ -5,6 +5,7 @@ import {
   ConflictException,
   ExceptionFilter,
   HttpException,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Response } from 'express';
@@ -29,6 +30,14 @@ export class HttpFilter implements ExceptionFilter {
           exception.message || 'Unauthorized',
         );
         break;
+      case ERROR_CODES.POST_NOT_FOUND:
+      case ERROR_CODES.COMMENT_NOT_FOUND:
+        httpException = new NotFoundException(exception.message || 'Not Found');
+        break;
+      case ERROR_CODES.COMMENT_DELETED:
+      case ERROR_CODES.POST_DELETED:
+        httpException = new NotFoundException(exception.message || 'Not Found');
+        break;
       default:
         httpException = new BadRequestException(
           exception.message || 'Bad Request',
@@ -39,7 +48,13 @@ export class HttpFilter implements ExceptionFilter {
     const status = httpException.getStatus();
     const responseBody = httpException.getResponse();
 
+    // Add error code to response body for CustomError
+    const enhancedResponseBody = {
+      ...(typeof responseBody === 'object' ? responseBody : { message: responseBody }),
+      code: exception.code,
+    };
+
     // Send the response
-    response.status(status).json(responseBody);
+    response.status(status).json(enhancedResponseBody);
   }
 }

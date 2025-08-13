@@ -8,10 +8,14 @@ import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 
 import { Token, TokenType } from '@libs/business';
+import { ConfigService } from '@libs/infrastructure';
 
 @Injectable()
 export class AccessTokenGuard implements CanActivate {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+  ) {}
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>();
@@ -22,7 +26,9 @@ export class AccessTokenGuard implements CanActivate {
     }
 
     try {
-      const payload: Token = this.jwtService.verify(token);
+      const payload: Token = this.jwtService.verify(token, {
+        secret: this.configService.get('JWT_ACCESS_SECRET'),
+      });
 
       if (payload.type !== TokenType.ACCESS_TOKEN) {
         throw new UnauthorizedException('Invalid token type');

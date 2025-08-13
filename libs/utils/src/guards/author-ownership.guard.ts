@@ -3,12 +3,12 @@ import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
-  NotFoundException,
 } from '@nestjs/common';
 import { Request } from 'express';
 
 import { Token } from '@libs/business';
 import { PrismaService } from '@libs/infrastructure';
+import { CustomError, ERROR_CODES } from '../custom-error';
 
 @Injectable()
 export class AuthorOwnershipGuard implements CanActivate {
@@ -60,11 +60,17 @@ export class AuthorOwnershipGuard implements CanActivate {
       });
 
       if (!post) {
-        throw new NotFoundException(`Post with ID ${resourceId} not found`);
+        throw new CustomError(
+          ERROR_CODES.POST_NOT_FOUND,
+          `Post with ID ${resourceId} not found`,
+        );
       }
 
       if (post.deletedAt) {
-        throw new NotFoundException('Post has been deleted');
+        throw new CustomError(
+          ERROR_CODES.POST_DELETED,
+          'Post has been deleted',
+        );
       }
 
       if (post.authorId !== userId) {
@@ -77,11 +83,17 @@ export class AuthorOwnershipGuard implements CanActivate {
       });
 
       if (!comment) {
-        throw new NotFoundException(`Comment with ID ${resourceId} not found`);
+        throw new CustomError(
+          ERROR_CODES.COMMENT_NOT_FOUND,
+          `Comment with ID ${resourceId} not found`,
+        );
       }
 
       if (comment.deletedAt) {
-        throw new NotFoundException('Comment has been deleted');
+        throw new CustomError(
+          ERROR_CODES.COMMENT_DELETED,
+          'Comment has been deleted',
+        );
       }
 
       if (comment.authorId !== userId) {
