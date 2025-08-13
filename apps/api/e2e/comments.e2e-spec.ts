@@ -3,6 +3,7 @@ import TestAgent from 'supertest/lib/agent';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { prisma } from '../../../tests/e2e/setup';
+import { SignInResponseDto } from '../src/auth/dtos';
 
 interface AuthUser {
   id: string;
@@ -11,12 +12,6 @@ interface AuthUser {
   introduction: string | null;
   createdAt: string;
   updatedAt: string;
-}
-
-interface SignInResponse {
-  id: string;
-  accessToken: string;
-  refreshToken: string;
 }
 
 interface Comment {
@@ -86,7 +81,7 @@ describe('Comments API E2E Tests', () => {
       })
       .expect(201);
 
-    authToken = (signInResponse.body as SignInResponse).accessToken;
+    authToken = (signInResponse.body as SignInResponseDto).accessToken;
 
     // Create a test post with unique slug
     const postUniqueId = Math.random().toString(36).substring(7);

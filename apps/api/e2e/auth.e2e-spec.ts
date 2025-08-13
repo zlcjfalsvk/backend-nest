@@ -2,6 +2,8 @@ import supertest from 'supertest';
 import TestAgent from 'supertest/lib/agent';
 import { describe, it, expect, beforeEach } from 'vitest';
 
+import { SignInResponseDto } from '../src/auth/dtos';
+
 interface AuthUser {
   id: string;
   email: string;
@@ -9,12 +11,6 @@ interface AuthUser {
   introduction: string | null;
   createdAt: string;
   updatedAt: string;
-}
-
-interface SignInResponse {
-  id: string;
-  accessToken: string;
-  refreshToken: string;
 }
 
 const API_BASE_URL = 'http://localhost:3000';
@@ -151,7 +147,7 @@ describe('Auth API E2E Tests', () => {
         .send(signInData)
         .expect(201);
 
-      const signInResponse = response.body as SignInResponse;
+      const signInResponse = response.body as SignInResponseDto;
       expect(signInResponse).toBeDefined();
       expect(signInResponse.accessToken).toBeDefined();
       expect(typeof signInResponse.accessToken).toBe('string');
@@ -226,7 +222,7 @@ describe('Auth API E2E Tests', () => {
         })
         .expect(201);
 
-      const { accessToken } = signInResponse.body as SignInResponse;
+      const { accessToken } = signInResponse.body as SignInResponseDto;
       expect(accessToken).toBeDefined();
 
       // Test that the token works for accessing protected routes
