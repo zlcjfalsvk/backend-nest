@@ -1,0 +1,222 @@
+name: E2E Tests
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  e2e-tests:
+    name: E2E Tests - ${{ matrix.app }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [api, trpc]
+        include:
+          - app: api
+            port: 3000
+            build_cmd: nest build api
+            start_cmd: api:start:prod
+            test_cmd: e2e:api:test
+            health_endpoint: /health
+            results_file: api-e2e-results.json
+          - app: trpc
+            port: 3001
+            build_cmd: nest build trpc
+            start_cmd: trpc:start:prod
+            test_cmd: e2e:trpc:test
+            health_endpoint: /trpc/health
+            results_file: trpc-e2e-results.json
+
+    env:
+      DATABASE_URL: postgresql://testuser:${{ secrets.TEST_DB_PASSWORD || 'testpass' }}@localhost:5433/testdb
+      NODE_ENV: test
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: testdb
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: ${{ secrets.TEST_DB_PASSWORD || 'testpass' }}
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Cache Prisma Client
+        uses: actions/cache@v3
+        with:
+          path: node_modules/.prisma
+          key: ${{ runner.os }}-prisma-${{ hashFiles('**/schema.prisma') }}
+          restore-keys: |
+            ${{ runner.os }}-prisma-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npm run prisma:generate
+
+      - name: Run Prisma migrations
+        run: npx prisma migrate deploy --schema=./prisma/schema.prisma
+        timeout-minutes: 5
+
+      - name: Seed test data
+        run: npx tsx tests/e2e/seed.ts
+        timeout-minutes: 5
+
+      - name: Build ${{ matrix.app }} application
+        run: ${{ matrix.build_cmd }}
+        timeout-minutes: 10
+
+      - name: Install wait-on
+        run: npm install -g wait-on pm2
+
+      - name: Start ${{ matrix.app }} server
+        run: |
+          pm2 start npm --name ${{ matrix.app }} -- run ${{ matrix.start_cmd }}
+          pm2 logs ${{ matrix.app }} --nostream
+          echo "Waiting for ${{ matrix.app }} server to be ready..."
+          wait-on http://localhost:${{ matrix.port }}${{ matrix.health_endpoint }} --timeout 60000
+          echo "${{ matrix.app }} server is ready!"
+
+      - name: Run ${{ matrix.app }} E2E tests
+        id: run-tests
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 10
+          max_attempts: 2
+          command: npm run ${{ matrix.test_cmd }}
+        continue-on-error: true
+
+      - name: Collect logs on failure
+        if: failure() || steps.run-tests.outcome == 'failure'
+        run: |
+          mkdir -p logs
+          echo "=== ${{ matrix.app }} Application Logs ===" >> logs/debug-${{ matrix.app }}.log
+          pm2 logs ${{ matrix.app }} --nostream --lines 100 >> logs/debug-${{ matrix.app }}.log 2>&1
+          echo "=== Database Connection Test ===" >> logs/debug-${{ matrix.app }}.log
+          npx prisma db execute --stdin --schema=./prisma/schema.prisma <<< "SELECT version();" >> logs/debug-${{ matrix.app }}.log 2>&1 || true
+          echo "=== Process Information ===" >> logs/debug-${{ matrix.app }}.log
+          pm2 describe ${{ matrix.app }} >> logs/debug-${{ matrix.app }}.log 2>&1
+          echo "=== Port Information ===" >> logs/debug-${{ matrix.app }}.log
+          netstat -tlnp 2>/dev/null | grep ${{ matrix.port }} >> logs/debug-${{ matrix.app }}.log || true
+
+      - name: Stop ${{ matrix.app }} server
+        if: always()
+        run: |
+          pm2 delete ${{ matrix.app }} || true
+          pm2 kill || true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.app }}-e2e-results
+          path: |
+            logs/${{ matrix.results_file }}
+            logs/debug-${{ matrix.app }}.log
+          if-no-files-found: ignore
+
+      - name: Mark test status
+        if: always()
+        run: |
+          if [ "${{ steps.run-tests.outcome }}" == "success" ]; then
+            echo "✅ ${{ matrix.app }} E2E tests passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ ${{ matrix.app }} E2E tests failed" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+  e2e-summary:
+    name: E2E Test Summary
+    runs-on: ubuntu-latest
+    needs: [e2e-tests]
+    if: always()
+
+    steps:
+      - name: Create test summary
+        run: |
+          echo "# 📊 E2E Test Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Test Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Parse job results
+          API_STATUS="${{ needs.e2e-tests.outputs.api-status }}"
+          TRPC_STATUS="${{ needs.e2e-tests.outputs.trpc-status }}"
+          
+          if [ "${{ needs.e2e-tests.result }}" == "success" ]; then
+            echo "### ✅ All E2E Tests Passed!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ⚠️ Some E2E Tests Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Individual Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Application | Status | Artifacts |" >> $GITHUB_STEP_SUMMARY
+          echo "|------------|--------|-----------|" >> $GITHUB_STEP_SUMMARY
+          echo "| API | Check workflow | [Download](../actions/runs/${{ github.run_id }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "| tRPC | Check workflow | [Download](../actions/runs/${{ github.run_id }}) |" >> $GITHUB_STEP_SUMMARY
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📝 Additional Information" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Workflow Run:** #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Runner:** ${{ runner.os }} - ${{ runner.arch }}" >> $GITHUB_STEP_SUMMARY
+          
+          # Set final job status
+          if [ "${{ needs.e2e-tests.result }}" != "success" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 🔍 Debug Information" >> $GITHUB_STEP_SUMMARY
+            echo "Check the artifacts for detailed logs and test results." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+      - name: Download all artifacts
+        if: failure()
+        uses: actions/download-artifact@v4
+        with:
+          path: ./test-artifacts
+        continue-on-error: true
+
+      - name: Display failure logs
+        if: failure()
+        run: |
+          echo "=== Displaying available debug logs ===" 
+          find ./test-artifacts -name "*.log" -type f -exec echo "File: {}" \; -exec head -100 {} \; 2>/dev/null || true
