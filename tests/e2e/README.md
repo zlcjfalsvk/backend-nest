@@ -1,224 +1,131 @@
-# E2E Testing Setup
+# E2E Tests Documentation
 
-This directory contains the complete End-to-End (E2E) testing setup for the Node.js application using Vitest as the primary test runner and Playwright for browser automation.
+이 문서는 분리된 API와 tRPC E2E 테스트 구조에 대해 설명합니다.
 
-## Overview
-
-The E2E testing environment includes:
-
-- **Vitest** as the primary test runner for API testing
-- **Playwright** for browser automation (if needed)
-- **PostgreSQL** test database running in Docker
-- **Prisma** for database management and seeding
-- **Supertest** for HTTP API testing
-
-## Project Structure
+## 디렉토리 구조
 
 ```
 tests/e2e/
-├── README.md                    # This file
-├── vitest.config.e2e.ts        # Vitest configuration for E2E tests
-├── playwright.config.ts        # Playwright configuration
-├── global-setup.ts             # Global setup script (DB, seeding)
-├── global-teardown.ts          # Global teardown script
-├── setup.ts                    # Test setup (Prisma client, cleanup)
-├── seed.ts                     # Database seeding script
-├── auth.e2e-spec.ts            # Authentication E2E tests
-├── posts.e2e-spec.ts           # Posts API E2E tests
-├── comments.e2e-spec.ts        # Comments API E2E tests
-└── health.e2e-spec.ts          # Application health E2E tests
+├── api/                          # API 전용 설정
+│   ├── global-setup.ts          # API E2E 글로벌 설정
+│   ├── global-teardown.ts       # API E2E 글로벌 정리
+│   └── vitest.config.e2e.mts    # API E2E vitest 설정
+├── trpc/                        # tRPC 전용 설정
+│   ├── global-setup.ts          # tRPC E2E 글로벌 설정
+│   ├── global-teardown.ts       # tRPC E2E 글로벌 정리
+│   └── vitest.config.e2e.mts    # tRPC E2E vitest 설정
+├── setup.ts                     # 공통 테스트 설정
+├── seed.ts                      # 테스트 데이터 시드
+└── playwright.config.ts         # Playwright 설정
+
+apps/
+├── api/e2e/                     # API E2E 테스트 파일들
+│   ├── app.e2e-spec.ts
+│   ├── auth.e2e-spec.ts
+│   ├── health.e2e-spec.ts
+│   ├── posts.e2e-spec.ts
+│   └── comments.e2e-spec.ts
+└── trpc/e2e/                    # tRPC E2E 테스트 파일들
+    ├── app.e2e-spec.ts
+    ├── auth.e2e-spec.ts
+    ├── health.e2e-spec.ts
+    ├── posts.e2e-spec.ts
+    └── comments.e2e-spec.ts
+
+scripts/
+├── e2e-api-setup.sh            # API 전용 설정 스크립트
+├── e2e-api-teardown.sh         # API 전용 정리 스크립트
+├── e2e-trpc-setup.sh           # tRPC 전용 설정 스크립트
+└── e2e-trpc-teardown.sh        # tRPC 전용 정리 스크립트
 ```
 
-## Prerequisites
+## NPM 스크립트
 
-1. **Docker & Docker Compose** - for running PostgreSQL test database
-2. **Node.js** - compatible with project requirements (>=22.0.0)
-3. **npm** - for package management (>=10.0.0)
+### API E2E 테스트
+```bash
+# API E2E 테스트만 실행
+npm run e2e:api
 
-## Quick Start
+# 개별 단계 실행
+npm run e2e:api:setup      # API 서버 및 데이터베이스 설정
+npm run e2e:api:test       # API E2E 테스트 실행
+npm run e2e:api:teardown   # API 환경 정리
+```
 
-### 1. Run Complete E2E Test Suite
+### tRPC E2E 테스트
+```bash
+# tRPC E2E 테스트만 실행
+npm run e2e:trpc
 
+# 개별 단계 실행
+npm run e2e:trpc:setup     # tRPC 서버 및 데이터베이스 설정
+npm run e2e:trpc:test      # tRPC E2E 테스트 실행
+npm run e2e:trpc:teardown  # tRPC 환경 정리
+```
+
+### 통합 E2E 테스트
+```bash
+# 모든 E2E 테스트 실행 (API + tRPC) - 순차 실행
+npm run e2e
+
+# Playwright 포함 전체 테스트
+npm run e2e:full
+```
+
+**주의**: 통합 E2E 테스트(`npm run e2e`)는 API와 tRPC 테스트를 순차적으로 실행합니다. 각 테스트는 독립적인 환경에서 실행되므로 더 안정적입니다.
+
+## 분리의 장점
+
+1. **독립적 실행**: API와 tRPC 테스트를 각각 독립적으로 실행 가능
+2. **빠른 피드백**: 특정 서비스의 테스트만 실행하여 개발 속도 향상
+3. **리소스 효율성**: 필요한 서버만 시작하여 시스템 리소스 절약
+4. **병렬 실행**: CI/CD에서 API와 tRPC 테스트를 병렬로 실행 가능
+5. **디버깅 용이성**: 특정 서비스의 문제를 격리하여 디버깅 가능
+6. **구조화된 설정**: 각 서비스의 설정이 해당 폴더에 집중되어 관리 용이
+
+## 포트 사용
+
+- **API 서버**: http://localhost:3000
+- **tRPC 서버**: http://localhost:3001/trpc
+- **테스트 데이터베이스**: postgresql://testuser:testpass@localhost:5433/testdb
+
+## 사용 시나리오
+
+### API 개발 중
+```bash
+npm run e2e:api
+```
+
+### tRPC 개발 중
+```bash
+npm run e2e:trpc
+```
+
+### 전체 통합 테스트
 ```bash
 npm run e2e
 ```
 
-This command will:
-- Start PostgreSQL test database in Docker
-- Run Prisma migrations
-- Seed test data
-- Execute all E2E tests
-- Clean up environment
-
-### 2. Individual Commands
-
-```bash
-# Setup test environment
-npm run e2e:setup
-
-# Run E2E tests only (requires setup first)
-npm run e2e:test
-
-# Run E2E tests with UI
-npm run e2e:test:ui
-
-# Run Playwright tests (browser automation)
-npm run e2e:playwright
-
-# Teardown test environment
-npm run e2e:teardown
-
-# Run both Vitest and Playwright tests
-npm run e2e:full
-```
-
-## Test Database Configuration
-
-The test database runs in Docker using the following configuration:
-
-- **Host**: localhost
-- **Port**: 5433 (different from default 5432 to avoid conflicts)
-- **Database**: testdb
-- **User**: testuser
-- **Password**: testpass
-- **Connection URL**: `postgresql://testuser:testpass@localhost:5433/testdb`
-
-## Test Data
-
-The seeding script (`seed.ts`) creates:
-
-- **3 test users** with different roles and data
-- **5 test posts** with varying published states and view counts
-- **5 test comments** across different posts
-
-## Test Coverage
-
-### Authentication Tests (`auth.e2e-spec.ts`)
-- User registration (sign-up)
-- User authentication (sign-in)
-- Input validation
-- Duplicate email/nickname handling
-- Authentication token integration
-
-### Posts API Tests (`posts.e2e-spec.ts`)
-- CRUD operations (Create, Read, Update, Delete)
-- Authentication required endpoints
-- Input validation
-- Pagination and filtering
-- Error handling
-
-### Comments API Tests (`comments.e2e-spec.ts`)
-- CRUD operations for comments
-- Comment-post relationships
-- Authentication requirements
-- Input validation
-- Error scenarios
-
-### Health Tests (`health.e2e-spec.ts`)
-- Application connectivity
-- CORS handling
-- Error responses
-- Security headers
-- Database connectivity
-
-## Environment Variables
-
-The following environment variables are used for E2E testing:
-
-```bash
-DATABASE_URL=postgresql://testuser:testpass@localhost:5433/testdb
-```
-
-## Troubleshooting
-
-### Docker Issues
-
-1. **Docker not running**:
-   ```bash
-   # Start Docker Desktop or Docker daemon
-   sudo systemctl start docker  # Linux
-   ```
-
-2. **Port 5433 already in use**:
-   ```bash
-   # Find and kill process using port 5433
-   lsof -ti:5433 | xargs kill -9
-   ```
-
-3. **Database connection issues**:
-   ```bash
-   # Check if test database is running
-   docker compose -f docker-compose.test.yaml ps
-   
-   # View database logs
-   docker compose -f docker-compose.test.yaml logs postgres-test
-   ```
-
-### Test Issues
-
-1. **Prisma client errors**:
-   ```bash
-   # Regenerate Prisma client
-   npx prisma generate --schema=./prisma/schema.prisma
-   ```
-
-2. **Migration issues**:
-   ```bash
-   # Reset database and run migrations
-   npm run e2e:teardown
-   npm run e2e:setup
-   ```
-
-3. **Seed data issues**:
-   ```bash
-   # Run seeding manually
-   tsx tests/e2e/seed.ts
-   ```
-
-## CI/CD Integration
-
-For CI/CD pipelines, use the complete E2E command:
-
+### CI/CD에서 병렬 실행
 ```yaml
-# GitHub Actions example
-- name: Run E2E Tests
-  run: npm run e2e
+# GitHub Actions 예시
+jobs:
+  api-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - run: npm run e2e:api
+  
+  trpc-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - run: npm run e2e:trpc
 ```
 
-The setup is idempotent and can be run multiple times without issues.
+## 설정 파일 구조
 
-## Best Practices
+각 서비스의 vitest 설정 파일은 해당 서비스 폴더 안에 위치합니다:
 
-1. **Isolation**: Each test is isolated with database cleanup
-2. **Realistic Data**: Use realistic test data that mirrors production
-3. **Error Testing**: Test both success and failure scenarios
-4. **Performance**: Tests should run quickly (< 30 seconds per test)
-5. **Cleanup**: Always clean up resources after tests
+- `tests/e2e/api/vitest.config.e2e.mts` - API 전용 설정
+- `tests/e2e/trpc/vitest.config.e2e.mts` - tRPC 전용 설정
 
-## Extending Tests
-
-To add new E2E tests:
-
-1. Create a new `.e2e-spec.ts` file in this directory
-2. Import the `prisma` client from `./setup`
-3. Use `supertest` for API testing
-4. Follow existing patterns for authentication and data setup
-5. Ensure proper cleanup in `beforeEach` hooks
-
-## Playwright Browser Tests
-
-If you need browser automation:
-
-1. Tests go in files ending with `.playwright.ts`
-2. Use Playwright's test runner and page objects
-3. Configure base URL in `playwright.config.ts`
-4. Screenshots and videos are saved to `logs/playwright-artifacts/`
-
-## Support
-
-For issues or questions about the E2E testing setup, check:
-
-1. Test logs in the `logs/` directory
-2. Docker container logs
-3. Database connection status
-4. Environment variable configuration
+이를 통해 각 서비스의 설정을 독립적으로 관리할 수 있으며, 설정 파일을 찾기도 쉬워집니다.

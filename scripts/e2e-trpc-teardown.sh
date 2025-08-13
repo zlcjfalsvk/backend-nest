@@ -2,7 +2,7 @@
 
 set -e
 
-echo "🧹 Tearing down E2E test environment..."
+echo "🧹 Tearing down tRPC E2E test environment..."
 
 # Colors for output
 RED='\033[0;31m'
@@ -41,23 +41,23 @@ docker volume ls -q | grep -E "(postgres-test|postgres_test)" | xargs -r docker 
 
 # Clean up logs directory if it exists
 if [ -d "logs" ]; then
-    print_status "Cleaning up test logs..."
-    rm -rf logs/e2e-results.json logs/playwright-* || print_warning "Failed to clean some log files"
+    print_status "Cleaning up tRPC test logs..."
+    rm -rf logs/trpc-e2e-results.json || print_warning "Failed to clean tRPC log files"
 fi
 
-# Kill API server if PID file exists
-if [ -f "/tmp/e2e-api.pid" ]; then
-    print_status "Stopping API server..."
-    API_PID=$(cat /tmp/e2e-api.pid)
-    kill $API_PID 2>/dev/null || true
-    rm /tmp/e2e-api.pid
+# Kill tRPC server if PID file exists
+if [ -f "/tmp/e2e-trpc.pid" ]; then
+    print_status "Stopping tRPC server..."
+    TRPC_PID=$(cat /tmp/e2e-trpc.pid)
+    kill $TRPC_PID 2>/dev/null || true
+    rm /tmp/e2e-trpc.pid
     sleep 2
 fi
 
-# Kill any remaining processes on test ports
-print_status "Ensuring all test ports are cleaned up..."
-lsof -ti:3000 | xargs -r kill -9 2>/dev/null || true
+# Kill any remaining processes on tRPC port
+print_status "Ensuring tRPC port is cleaned up..."
+lsof -ti:3001 | xargs -r kill -9 2>/dev/null || true
 lsof -ti:5433 | xargs -r kill -9 2>/dev/null || true
 sleep 1
 
-print_status "✅ E2E test environment teardown complete!"
+print_status "✅ tRPC E2E test environment teardown complete!"

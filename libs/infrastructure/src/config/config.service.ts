@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
 
 // 환경 변수 타입 정의, 나중에 추가할 수 있음
-export type ServerType = 'api' | 'admin' | 'worker';
+export type ServerType = 'api' | 'trpc';
 
 export interface EnvConfig {
   // 서버
@@ -44,8 +44,7 @@ export class ConfigService {
 
     const serverSchemas: Record<ServerType, z.ZodSchema<any>> = {
       api: baseSchema,
-      admin: baseSchema,
-      worker: baseSchema,
+      trpc: baseSchema,
     };
 
     // 현재 서버 타입에 대한 스키마 가져오기

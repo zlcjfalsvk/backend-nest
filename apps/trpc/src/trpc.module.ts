@@ -20,7 +20,7 @@ import { TrpcRouter } from './trpc.router';
     CommentModule,
     PostModule,
     PrismaModule,
-    ConfigModule,
+    ConfigModule.forRoot('trpc'),
   ],
   providers: [TrpcRouter],
   exports: [TrpcRouter],

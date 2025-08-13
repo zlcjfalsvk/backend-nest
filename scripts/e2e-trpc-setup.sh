@@ -2,7 +2,7 @@
 
 set -e
 
-echo "🚀 Setting up E2E test environment..."
+echo "🚀 Setting up tRPC E2E test environment..."
 
 # Colors for output
 RED='\033[0;31m'
@@ -95,44 +95,44 @@ if ! tsx tests/e2e/seed.ts; then
     exit 1
 fi
 
-# Kill any existing processes on port 3000
-print_status "Ensuring port 3000 is available..."
-lsof -ti:3000 | xargs -r kill -9 2>/dev/null || true
+# Kill any existing processes on port 3001
+print_status "Ensuring port 3001 is available..."
+lsof -ti:3001 | xargs -r kill -9 2>/dev/null || true
 sleep 2
 
-# Start API server in background
-print_status "Starting API server..."
-npm run api:start:prod &
-API_PID=$!
+# Start tRPC server in background
+print_status "Starting tRPC server..."
+npm run trpc:start:prod &
+TRPC_PID=$!
 
-# Wait for API server to start
-print_status "Waiting for API server to start..."
+# Wait for tRPC server to start
+print_status "Waiting for tRPC server to start..."
 sleep 10
 
-# Test if API server is responding
+# Test if tRPC server is responding
 max_attempts=30
 attempt=1
 while [ $attempt -le $max_attempts ]; do
-    if curl -s http://localhost:3000/posts > /dev/null 2>&1; then
-        print_status "API server is ready!"
+    if curl -s http://localhost:3001/trpc > /dev/null 2>&1; then
+        print_status "tRPC server is ready!"
         break
     fi
 
     if [ $attempt -eq $max_attempts ]; then
-        print_error "API server failed to start after $max_attempts attempts"
-        kill $API_PID 2>/dev/null || true
+        print_error "tRPC server failed to start after $max_attempts attempts"
+        kill $TRPC_PID 2>/dev/null || true
         exit 1
     fi
 
-    echo "Attempt $attempt/$max_attempts - waiting for API server..."
+    echo "Attempt $attempt/$max_attempts - waiting for tRPC server..."
     sleep 2
     ((attempt++))
 done
 
-# Save API PID for cleanup
-echo $API_PID > /tmp/e2e-api.pid
+# Save tRPC PID for cleanup
+echo $TRPC_PID > /tmp/e2e-trpc.pid
 
-print_status "✅ E2E test environment setup complete!"
+print_status "✅ tRPC E2E test environment setup complete!"
 print_status "Database URL: $DATABASE_URL"
-print_status "API Server: http://localhost:3000"
-print_status "You can now run E2E tests with: npm run e2e"
+print_status "tRPC Server: http://localhost:3001/trpc"
+print_status "You can now run tRPC E2E tests with: npm run e2e:trpc"
