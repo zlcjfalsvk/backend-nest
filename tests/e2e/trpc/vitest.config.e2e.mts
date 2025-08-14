@@ -26,7 +26,6 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     setupFiles: ['tests/e2e/setup.ts'],
-    globalSetup: 'tests/e2e/trpc/global-setup.ts',
     pool: 'forks',
     poolOptions: {
       forks: {

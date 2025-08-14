@@ -1,10 +1,13 @@
-import { PrismaClient } from '../../prisma/prisma-clients';
 import * as argon2 from 'argon2';
+
+import { PrismaClient } from '@prisma-client';
 
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: process.env.DATABASE_URL || 'postgresql://testuser:testpass@localhost:5433/testdb',
+      url:
+        process.env.DATABASE_URL ||
+        'postgresql://testuser:testpass@localhost:5433/testdb',
     },
   },
 });
@@ -22,7 +25,7 @@ async function seed() {
 
     // Create test users
     const hashedPassword = await argon2.hash('Password123!');
-    
+
     const users = await Promise.all([
       prisma.user.create({
         data: {
@@ -57,7 +60,8 @@ async function seed() {
       prisma.post.create({
         data: {
           title: 'First Test Post',
-          content: 'This is the content of the first test post for E2E testing.',
+          content:
+            'This is the content of the first test post for E2E testing.',
           slug: 'first-test-post',
           published: true,
           views: 10,
@@ -67,7 +71,8 @@ async function seed() {
       prisma.post.create({
         data: {
           title: 'Second Test Post',
-          content: 'This is the content of the second test post for E2E testing.',
+          content:
+            'This is the content of the second test post for E2E testing.',
           slug: 'second-test-post',
           published: true,
           views: 25,
@@ -149,7 +154,6 @@ async function seed() {
 
     console.log('✅ Created test comments:', comments.length);
     console.log('🎉 Test data seeding completed successfully!');
-
   } catch (error) {
     console.error('❌ Error seeding test data:', error);
     throw error;
