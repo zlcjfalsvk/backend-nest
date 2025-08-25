@@ -1,14 +1,14 @@
 export class PostResponseDto {
-  id: number;
-  slug: string;
-  title: string;
-  content: string;
-  published: boolean;
-  views: number;
-  authorId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null;
+  id: number = 0;
+  slug: string = '';
+  title: string = '';
+  content: string = '';
+  published: boolean = false;
+  views: number = 0;
+  authorId: string = '';
+  createdAt: Date = new Date();
+  updatedAt: Date = new Date();
+  deletedAt: Date | null = null;
   author?: {
     id: string;
     nickName: string;
@@ -16,8 +16,8 @@ export class PostResponseDto {
 }
 
 export class PostsResponseDto {
-  posts: PostResponseDto[];
-  totalCount: number;
-  totalPages: number;
-  nextCursor: number | null;
+  posts: PostResponseDto[] = [];
+  totalCount: number = 0;
+  totalPages: number = 0;
+  nextCursor: number | null = null;
 }

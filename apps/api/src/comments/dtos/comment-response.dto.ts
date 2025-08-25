@@ -1,19 +1,21 @@
+class AuthorInCommentResponseDto {
+  id: string = '';
+  nickName: string = '';
+}
+
 export class CommentResponseDto {
-  id: number;
-  content: string;
-  postId: number;
-  authorId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null;
-  author?: {
-    id: string;
-    nickName: string;
-  };
+  id: number = 0;
+  content: string = '';
+  postId: number = 0;
+  authorId: string = '';
+  createdAt: Date = new Date();
+  updatedAt: Date = new Date();
+  deletedAt: Date | null = null;
+  author: AuthorInCommentResponseDto = new AuthorInCommentResponseDto();
 }
 
 export class CommentsResponseDto {
-  comments: CommentResponseDto[];
-  totalCount: number;
-  nextCursor: number | null;
+  comments: CommentResponseDto[] = [];
+  totalCount: number = 0;
+  nextCursor: number | null = null;
 }

@@ -3,42 +3,15 @@ import TestAgent from 'supertest/lib/agent';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { prisma } from '../../../tests/e2e/setup';
-import { SignInResponseDto } from '../src/auth/dtos';
-
-interface AuthUser {
-  id: string;
-  email: string;
-  nickName: string;
-  introduction: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface Comment {
-  id: number;
-  content: string;
-  postId: number;
-  authorId: string;
-  createdAt: string;
-  updatedAt: string;
-  author: {
-    id: string;
-    nickName: string;
-  };
-}
-
-interface CommentsResponse {
-  comments: Comment[];
-  totalCount: number;
-  nextCursor: number | null;
-}
+import { SignInResponseDto, SignUpResponseDto } from '../src/auth/dtos';
+import { CommentResponseDto, CommentsResponseDto } from '../src/comments/dtos';
 
 const API_BASE_URL = 'http://localhost:3000';
 
 describe('Comments API E2E Tests', () => {
   let request: TestAgent<supertest.Test>;
   let authToken: string;
-  let testUser: AuthUser;
+  let testUser: SignUpResponseDto;
   let testPost: {
     id: number;
     title: string;
@@ -71,7 +44,7 @@ describe('Comments API E2E Tests', () => {
       .send(userData)
       .expect(201);
 
-    testUser = userResponse.body as AuthUser;
+    testUser = userResponse.body as SignUpResponseDto;
 
     const signInResponse = await request
       .post('/auth/sign-in')
@@ -106,12 +79,12 @@ describe('Comments API E2E Tests', () => {
   });
 
   describe('GET /comments/post/:postId', () => {
-    it('should return all comments for a specific post', async () => {
+    it('should return all comments for a specific post as CommentsResponseDto', async () => {
       const response = await request
         .get(`/comments/post/${testPost.id}`)
         .expect(200);
 
-      const commentsResponse = response.body as CommentsResponse;
+      const commentsResponse = response.body as CommentsResponseDto;
       expect(commentsResponse).toBeDefined();
       expect(commentsResponse.comments).toBeDefined();
       expect(Array.isArray(commentsResponse.comments)).toBe(true);
@@ -119,11 +92,20 @@ describe('Comments API E2E Tests', () => {
       expect(typeof commentsResponse.totalCount).toBe('number');
       expect(commentsResponse.comments.length).toBeGreaterThan(0);
 
+      // Verify DTO structure
+      expect(commentsResponse).toHaveProperty('comments');
+      expect(commentsResponse).toHaveProperty('totalCount');
+      expect(commentsResponse).toHaveProperty('nextCursor');
+
       // Check comment structure
       const comment = commentsResponse.comments[0];
       expect(comment).toHaveProperty('id');
       expect(comment).toHaveProperty('content');
       expect(comment).toHaveProperty('postId', testPost.id);
+      expect(comment).toHaveProperty('authorId');
+      expect(comment).toHaveProperty('createdAt');
+      expect(comment).toHaveProperty('updatedAt');
+      expect(comment).toHaveProperty('deletedAt');
       expect(comment).toHaveProperty('author');
       expect(comment.author).toHaveProperty('id');
       expect(comment.author).toHaveProperty('nickName');
@@ -143,7 +125,7 @@ describe('Comments API E2E Tests', () => {
         .get(`/comments/post/${testPost.id}?take=1`)
         .expect(200);
 
-      const commentsResponse = response.body as CommentsResponse;
+      const commentsResponse = response.body as CommentsResponseDto;
       expect(commentsResponse).toBeDefined();
       expect(commentsResponse.comments).toBeDefined();
       expect(commentsResponse.comments.length).toBe(1);
@@ -167,7 +149,7 @@ describe('Comments API E2E Tests', () => {
         .get(`/comments/post/${emptyPost.id}`)
         .expect(200);
 
-      const commentsResponse = response.body as CommentsResponse;
+      const commentsResponse = response.body as CommentsResponseDto;
       expect(commentsResponse).toBeDefined();
       expect(commentsResponse.comments).toBeDefined();
       expect(Array.isArray(commentsResponse.comments)).toBe(true);
@@ -182,12 +164,12 @@ describe('Comments API E2E Tests', () => {
   });
 
   describe('GET /comments/:id', () => {
-    it('should return a specific comment by ID', async () => {
+    it('should return a specific comment by ID as CommentResponseDto', async () => {
       const response = await request
         .get(`/comments/${testComment.id}`)
         .expect(200);
 
-      const comment = response.body as Comment;
+      const comment = response.body as CommentResponseDto;
       expect(comment).toBeDefined();
       expect(comment.id).toBe(testComment.id);
       expect(comment.content).toBe(testComment.content);
@@ -196,6 +178,16 @@ describe('Comments API E2E Tests', () => {
       expect(comment.author).toBeDefined();
       expect(comment.author.id).toBe(testUser.id);
       expect(comment.author.nickName).toBe(testUser.nickName);
+
+      // Verify DTO structure
+      expect(comment).toHaveProperty('id');
+      expect(comment).toHaveProperty('content');
+      expect(comment).toHaveProperty('postId');
+      expect(comment).toHaveProperty('authorId');
+      expect(comment).toHaveProperty('createdAt');
+      expect(comment).toHaveProperty('updatedAt');
+      expect(comment).toHaveProperty('deletedAt');
+      expect(comment).toHaveProperty('author');
     });
 
     it('should return 404 for non-existent comment', async () => {
@@ -209,7 +201,7 @@ describe('Comments API E2E Tests', () => {
   });
 
   describe('POST /comments', () => {
-    it('should create a new comment with valid data', async () => {
+    it('should create a new comment with valid data and return CommentResponseDto', async () => {
       const newCommentData = {
         content: 'This is a new test comment',
         postId: testPost.id,
@@ -222,7 +214,7 @@ describe('Comments API E2E Tests', () => {
         .send(newCommentData)
         .expect(201);
 
-      const comment = response.body as Comment;
+      const comment = response.body as CommentResponseDto;
       expect(comment).toBeDefined();
       expect(comment.content).toBe(newCommentData.content);
       expect(comment.postId).toBe(newCommentData.postId);
@@ -230,9 +222,16 @@ describe('Comments API E2E Tests', () => {
       expect(comment.author).toBeDefined();
       expect(comment.author.id).toBe(testUser.id);
       expect(comment.author.nickName).toBe(testUser.nickName);
+
+      // Verify DTO structure
       expect(comment).toHaveProperty('id');
+      expect(comment).toHaveProperty('content');
+      expect(comment).toHaveProperty('postId');
+      expect(comment).toHaveProperty('authorId');
       expect(comment).toHaveProperty('createdAt');
       expect(comment).toHaveProperty('updatedAt');
+      expect(comment).toHaveProperty('deletedAt');
+      expect(comment).toHaveProperty('author');
     });
 
     it('should return 401 when creating comment without authentication', async () => {
@@ -277,7 +276,7 @@ describe('Comments API E2E Tests', () => {
   });
 
   describe('PUT /comments/:id', () => {
-    it('should update an existing comment', async () => {
+    it('should update an existing comment and return CommentResponseDto', async () => {
       const updateData = {
         content: 'Updated comment content',
       };
@@ -288,7 +287,7 @@ describe('Comments API E2E Tests', () => {
         .send(updateData)
         .expect(200);
 
-      const comment = response.body as Comment;
+      const comment = response.body as CommentResponseDto;
       expect(comment).toBeDefined();
       expect(comment.content).toBe(updateData.content);
       expect(comment.id).toBe(testComment.id);
@@ -296,7 +295,16 @@ describe('Comments API E2E Tests', () => {
       expect(comment.authorId).toBe(testUser.id);
       expect(comment.author).toBeDefined();
       expect(comment.author.id).toBe(testUser.id);
+
+      // Verify DTO structure
+      expect(comment).toHaveProperty('id');
+      expect(comment).toHaveProperty('content');
+      expect(comment).toHaveProperty('postId');
+      expect(comment).toHaveProperty('authorId');
+      expect(comment).toHaveProperty('createdAt');
       expect(comment).toHaveProperty('updatedAt');
+      expect(comment).toHaveProperty('deletedAt');
+      expect(comment).toHaveProperty('author');
     });
 
     it('should return 401 when updating comment without authentication', async () => {
@@ -416,8 +424,8 @@ describe('Comments API E2E Tests', () => {
         .expect(201);
 
       // Verify created comments have correct structure
-      const comment1 = comment1Response.body as Comment;
-      const comment2 = comment2Response.body as Comment;
+      const comment1 = comment1Response.body as CommentResponseDto;
+      const comment2 = comment2Response.body as CommentResponseDto;
       expect(comment1).toHaveProperty('id');
       expect(comment1.content).toBe(comment1Data.content);
       expect(comment2).toHaveProperty('id');
@@ -428,7 +436,7 @@ describe('Comments API E2E Tests', () => {
         .get(`/comments/post/${newPost.id}`)
         .expect(200);
 
-      const allCommentsResponse = commentsResponse.body as CommentsResponse;
+      const allCommentsResponse = commentsResponse.body as CommentsResponseDto;
       expect(allCommentsResponse).toBeDefined();
       expect(allCommentsResponse.comments).toBeDefined();
       expect(Array.isArray(allCommentsResponse.comments)).toBe(true);

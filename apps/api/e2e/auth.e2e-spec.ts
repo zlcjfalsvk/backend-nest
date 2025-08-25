@@ -2,16 +2,7 @@ import supertest from 'supertest';
 import TestAgent from 'supertest/lib/agent';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { SignInResponseDto } from '../src/auth/dtos';
-
-interface AuthUser {
-  id: string;
-  email: string;
-  nickName: string;
-  introduction: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+import { SignInResponseDto, SignUpResponseDto } from '../src/auth/dtos';
 
 const API_BASE_URL = 'http://localhost:3000';
 
@@ -23,7 +14,7 @@ describe('Auth API E2E Tests', () => {
   });
 
   describe('POST /auth/sign-up', () => {
-    it('should create a new user with valid data', async () => {
+    it('should create a new user with valid data and return SignUpResponseDto', async () => {
       const userData = {
         email: 'newuser@example.com',
         nickName: 'newuser',
@@ -36,13 +27,23 @@ describe('Auth API E2E Tests', () => {
         .send(userData)
         .expect(201);
 
-      const user = response.body as AuthUser;
+      const user = response.body as SignUpResponseDto;
       expect(user).toBeDefined();
       expect(user.id).toBeDefined();
       expect(user.email).toBe(userData.email);
       expect(user.nickName).toBe(userData.nickName);
       expect(user.introduction).toBe(userData.introduction);
+      expect(user.createdAt).toBeDefined();
+      expect(user.updatedAt).toBeDefined();
       expect((user as any).password).toBeUndefined(); // Password should not be returned
+
+      // Verify DTO structure
+      expect(user).toHaveProperty('id');
+      expect(user).toHaveProperty('email');
+      expect(user).toHaveProperty('nickName');
+      expect(user).toHaveProperty('introduction');
+      expect(user).toHaveProperty('createdAt');
+      expect(user).toHaveProperty('updatedAt');
     });
 
     it('should return 400 for duplicate email', async () => {
@@ -136,7 +137,7 @@ describe('Auth API E2E Tests', () => {
         .expect(201);
     });
 
-    it('should sign in with valid credentials', async () => {
+    it('should sign in with valid credentials and return SignInResponseDto', async () => {
       const signInData = {
         email: 'signin@example.com',
         password: 'CorrectPassword123!',
@@ -153,6 +154,11 @@ describe('Auth API E2E Tests', () => {
       expect(typeof signInResponse.accessToken).toBe('string');
       expect(signInResponse.id).toBeDefined();
       expect(signInResponse.refreshToken).toBeDefined();
+
+      // Verify DTO structure
+      expect(signInResponse).toHaveProperty('id');
+      expect(signInResponse).toHaveProperty('accessToken');
+      expect(signInResponse).toHaveProperty('refreshToken');
     });
 
     it('should return 401 for incorrect password', async () => {
@@ -210,7 +216,7 @@ describe('Auth API E2E Tests', () => {
         .send(userData)
         .expect(201);
 
-      const user = signUpResponse.body as AuthUser;
+      const user = signUpResponse.body as SignUpResponseDto;
       expect(user.id).toBeDefined();
 
       // Sign in
