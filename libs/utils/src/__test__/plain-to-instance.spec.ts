@@ -7,8 +7,8 @@ import {
   MappingBuilder,
   type MappingOptions,
   mergeMappings,
-  plainArrayToDto,
-  plainToDto,
+  plainArrayToInstance,
+  plainToInstance,
   withMapping,
 } from '../plain-to-instance';
 
@@ -108,7 +108,7 @@ describe('plainToDto', () => {
   describe('기본 타입 변환', () => {
     it('문자열 타입을 올바르게 변환해야 한다', () => {
       const json = createUserJson();
-      const result = plainToDto(UserDTO, json);
+      const result = plainToInstance(UserDTO, json);
 
       expect(result.id).toBe(1);
       expect(result.name).toBe('John Doe');
@@ -117,7 +117,7 @@ describe('plainToDto', () => {
 
     it('문자열을 숫자로 올바르게 캐스팅해야 한다', () => {
       const json = { id: '123', age: '25' };
-      const result = plainToDto(UserDTO, json);
+      const result = plainToInstance(UserDTO, json);
 
       expect(result.id).toBe(123);
       expect(result.age).toBe(25);
@@ -136,14 +136,14 @@ describe('plainToDto', () => {
       ];
 
       testCases.forEach(({ input, expected }) => {
-        const result = plainToDto(UserDTO, { isActive: input });
+        const result = plainToInstance(UserDTO, { isActive: input });
         expect(result.isActive).toBe(expected);
       });
     });
 
     it('문자열을 Date로 올바르게 캐스팅해야 한다', () => {
       const json = { createdAt: '2024-01-15T10:00:00Z' };
-      const result = plainToDto(UserDTO, json);
+      const result = plainToInstance(UserDTO, json);
 
       expect(result.createdAt).toBeInstanceOf(Date);
       expect(result.createdAt.toISOString()).toBe('2024-01-15T10:00:00.000Z');
@@ -151,7 +151,7 @@ describe('plainToDto', () => {
 
     it('유효하지 않은 날짜 문자열을 처리해야 한다', () => {
       const json = { createdAt: 'invalid-date' };
-      const result = plainToDto(UserDTO, json);
+      const result = plainToInstance(UserDTO, json);
 
       expect(result.createdAt).toBeInstanceOf(Date);
       expect(isNaN(result.createdAt.getTime())).toBe(false);
@@ -171,7 +171,7 @@ describe('plainToDto', () => {
         },
       };
 
-      const result = plainToDto(UserDTO, json);
+      const result = plainToInstance(UserDTO, json);
 
       expect(result.address).toBeInstanceOf(AddressDTO);
       expect(result.address.street).toBe('123 Main St');
@@ -188,7 +188,7 @@ describe('plainToDto', () => {
         ],
       };
 
-      const result = plainToDto(UserDTO, json);
+      const result = plainToInstance(UserDTO, json);
 
       expect(Array.isArray(result.phones)).toBe(true);
       expect(result.phones).toHaveLength(2);
@@ -199,7 +199,7 @@ describe('plainToDto', () => {
 
     it('누락된 중첩 객체를 처리해야 한다', () => {
       const json = { id: 1, name: 'John' };
-      const result = plainToDto(UserDTO, json);
+      const result = plainToInstance(UserDTO, json);
 
       expect(result.address).toBeInstanceOf(AddressDTO);
       expect(result.address.street).toBe('');
@@ -208,7 +208,7 @@ describe('plainToDto', () => {
 
     it('빈 배열을 처리해야 한다', () => {
       const json = { id: 1, phones: [] };
-      const result = plainToDto(UserDTO, json);
+      const result = plainToInstance(UserDTO, json);
 
       expect(Array.isArray(result.phones)).toBe(true);
       expect(result.phones).toHaveLength(0);
@@ -229,7 +229,7 @@ describe('plainToDto', () => {
         ],
       };
 
-      const result = plainToDto(UserDTO, json, mappingOptions);
+      const result = plainToInstance(UserDTO, json, mappingOptions);
 
       expect(result.id).toBe(123);
       expect(result.name).toBe('John Doe');
@@ -260,7 +260,7 @@ describe('plainToDto', () => {
         },
       };
 
-      const result = plainToDto(UserDTO, json, mappingOptions);
+      const result = plainToInstance(UserDTO, json, mappingOptions);
 
       expect(result.id).toBe(123);
       expect(result.email).toBe('john@example.com');
@@ -282,7 +282,7 @@ describe('plainToDto', () => {
         },
       };
 
-      const result = plainToDto(UserDTO, json, mappingOptions);
+      const result = plainToInstance(UserDTO, json, mappingOptions);
 
       expect(result.id).toBe(123);
       expect(result.name).toBe('John');
@@ -300,7 +300,7 @@ describe('plainToDto', () => {
         },
       };
 
-      const result = plainToDto(UserDTO, json, mappingOptions);
+      const result = plainToInstance(UserDTO, json, mappingOptions);
 
       expect(result.name).toBe('Default Name');
       expect(result.email).toBe('default@example.com');
@@ -379,7 +379,7 @@ describe('plainToDto', () => {
         country: 'USA',
       };
 
-      const result = plainToDto(
+      const result = plainToInstance(
         UserProfileDTO,
         json,
         createComputedFieldMapping(),
@@ -427,7 +427,7 @@ describe('plainToDto', () => {
       };
 
       const json = { id: 1, name: 'Test' };
-      const result = plainToDto(TestDTO, json, mappingOptions);
+      const result = plainToInstance(TestDTO, json, mappingOptions);
 
       expect(result.id).toBe(1);
       expect(result.name).toBe('Test');
@@ -471,7 +471,7 @@ describe('plainToDto', () => {
         discount: 10,
       };
 
-      const result = plainToDto(OrderDTO, json, mappingOptions);
+      const result = plainToInstance(OrderDTO, json, mappingOptions);
 
       expect(result.price).toBe(100);
       expect(result.taxRate).toBe(0.1);
@@ -495,12 +495,12 @@ describe('plainToDto', () => {
         const json = createMappedUserJson();
 
         // MappedUserDTO 직접 사용
-        const result1 = plainToDto(MappedUserDTO, json);
+        const result1 = plainToInstance(MappedUserDTO, json);
         expect(result1.id).toBe(123);
         expect(result1.name).toBe('John Doe');
 
         // MappedUserDTO.mapping을 다른 변환에서 재사용
-        const result2 = plainToDto(UserDTO, json, MappedUserDTO.mapping);
+        const result2 = plainToInstance(UserDTO, json, MappedUserDTO.mapping);
         expect(result2.id).toBe(123);
         expect(result2.name).toBe('John Doe');
       });
@@ -538,7 +538,7 @@ describe('plainToDto', () => {
         });
 
         const json = { test_id: '42', test_name: 'Test' };
-        const result = plainToDto(TestDTO, json);
+        const result = plainToInstance(TestDTO, json);
 
         expect(result.id).toBe(42);
         expect(result.name).toBe('Test');
@@ -564,7 +564,7 @@ describe('plainToDto', () => {
           extendedMapping,
         );
         const json = { user_id: '123', email: 'john@example.com' };
-        const result = plainToDto(UserDTO, json, mergedMapping);
+        const result = plainToInstance(UserDTO, json, mergedMapping);
 
         expect(result.id).toBe(123);
         expect(result.email).toBe('JOHN@EXAMPLE.COM');
@@ -589,7 +589,7 @@ describe('plainToDto', () => {
           user_email: 'JOHN@EXAMPLE.COM',
         };
 
-        const result = plainToDto(UserDTOWithBuilder, json);
+        const result = plainToInstance(UserDTOWithBuilder, json);
 
         expect(result.id).toBe(123);
         expect(result.name).toBe('John Doe');
@@ -618,7 +618,7 @@ describe('plainToDto', () => {
         { id: '3', name: 'User 3', email: 'user3@example.com' },
       ];
 
-      const results = plainArrayToDto(UserDTO, jsonArray);
+      const results = plainArrayToInstance(UserDTO, jsonArray);
 
       expect(results).toHaveLength(3);
       results.forEach((result, index) => {
@@ -641,7 +641,7 @@ describe('plainToDto', () => {
         ],
       };
 
-      const results = plainArrayToDto(UserDTO, jsonArray, mappingOptions);
+      const results = plainArrayToInstance(UserDTO, jsonArray, mappingOptions);
 
       expect(results).toHaveLength(2);
       expect(results[0].id).toBe(1);
@@ -655,7 +655,7 @@ describe('plainToDto', () => {
 
   describe('엣지 케이스 및 보안', () => {
     it('null 입력을 처리해야 한다', () => {
-      const result = plainToDto(UserDTO, null);
+      const result = plainToInstance(UserDTO, null);
 
       expect(result).toBeInstanceOf(UserDTO);
       expect(result.id).toBe(0);
@@ -663,7 +663,7 @@ describe('plainToDto', () => {
     });
 
     it('undefined 입력을 처리해야 한다', () => {
-      const result = plainToDto(UserDTO, undefined);
+      const result = plainToInstance(UserDTO, undefined);
 
       expect(result).toBeInstanceOf(UserDTO);
       expect(result.id).toBe(0);
@@ -671,7 +671,7 @@ describe('plainToDto', () => {
     });
 
     it('빈 객체를 처리해야 한다', () => {
-      const result = plainToDto(UserDTO, {});
+      const result = plainToInstance(UserDTO, {});
 
       expect(result).toBeInstanceOf(UserDTO);
       expect(result.id).toBe(0);
@@ -687,7 +687,7 @@ describe('plainToDto', () => {
         anotherBadField: 'attack',
       };
 
-      const result = plainToDto(UserDTO, json);
+      const result = plainToInstance(UserDTO, json);
 
       expect(result.id).toBe(1);
       expect(result.name).toBe('John');
@@ -706,7 +706,7 @@ describe('plainToDto', () => {
         },
       };
 
-      const result = plainToDto(UserDTO, json);
+      const result = plainToInstance(UserDTO, json);
 
       expect(result.address.street).toBe('123 Main St');
       expect((result.address as any).extraField).toBeUndefined();
@@ -742,7 +742,7 @@ describe('plainToDto', () => {
         },
       };
 
-      const result = plainToDto(Level1DTO, json);
+      const result = plainToInstance(Level1DTO, json);
 
       expect(result.level2).toBeInstanceOf(Level2DTO);
       expect(result.level2.level3).toBeInstanceOf(Level3DTO);
@@ -756,7 +756,7 @@ describe('plainToDto', () => {
         address: 'not-an-object', // 문자열이지만 객체를 기대
       };
 
-      const result = plainToDto(UserDTO, json);
+      const result = plainToInstance(UserDTO, json);
 
       // address는 문자열이므로 처리되지 않고 기본값이 유지됨
       expect(result.address).toBeInstanceOf(AddressDTO);
@@ -771,7 +771,7 @@ describe('plainToDto', () => {
         phones: 'not-an-array', // 문자열이지만 배열을 기대
       };
 
-      const result = plainToDto(UserDTO, json);
+      const result = plainToInstance(UserDTO, json);
 
       // phones는 문자열이므로 처리되지 않고 기본값이 유지됨
       expect(Array.isArray(result.phones)).toBe(true);
@@ -789,7 +789,7 @@ describe('plainToDto', () => {
 
       const start = performance.now();
       for (let i = 0; i < iterations; i++) {
-        plainToDto(UserDTO, json);
+        plainToInstance(UserDTO, json);
       }
       const duration = performance.now() - start;
 
@@ -805,7 +805,7 @@ describe('plainToDto', () => {
       }));
 
       const start = performance.now();
-      const results = plainArrayToDto(UserDTO, largeArray);
+      const results = plainArrayToInstance(UserDTO, largeArray);
       const duration = performance.now() - start;
 
       expect(results).toHaveLength(100);
