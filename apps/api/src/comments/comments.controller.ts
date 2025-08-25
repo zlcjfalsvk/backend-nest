@@ -14,12 +14,18 @@ import {
 } from '@nestjs/common';
 
 import { CommentService } from '@libs/business';
-import { AuthorOwnershipGuard } from '@libs/utils';
+import {
+  AuthorOwnershipGuard,
+  plainToInstance,
+  plainArrayToInstance,
+} from '@libs/utils';
 
 import {
   CreateCommentDto,
   UpdateCommentDto,
   GetCommentsQueryDto,
+  CommentResponseDto,
+  CommentsResponseDto,
 } from './dtos';
 import { AccessTokenGuard } from '../auth/guards';
 
@@ -31,23 +37,36 @@ export class CommentsController {
   async getCommentsByPostId(
     @Param('postId', ParseIntPipe) postId: number,
     @Query() query: GetCommentsQueryDto,
-  ) {
-    return this.commentService.findsByPostId({
+  ): Promise<CommentsResponseDto> {
+    const result = await this.commentService.findsByPostId({
       postId,
       ...query,
     });
+    const response = plainToInstance(CommentsResponseDto, {
+      ...result,
+      comments: plainArrayToInstance(CommentResponseDto, result.comments),
+    });
+    // Ensure null values are preserved
+    response.nextCursor = result.nextCursor;
+    return response;
   }
 
   @Get(':id')
-  async getComment(@Param('id', ParseIntPipe) id: number) {
-    return this.commentService.find(id);
+  async getComment(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<CommentResponseDto> {
+    const result = await this.commentService.find(id);
+    return plainToInstance(CommentResponseDto, result);
   }
 
   @Post()
   @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.CREATED)
-  async createComment(@Body() createCommentDto: CreateCommentDto) {
-    return this.commentService.create(createCommentDto);
+  async createComment(
+    @Body() createCommentDto: CreateCommentDto,
+  ): Promise<CommentResponseDto> {
+    const result = await this.commentService.create(createCommentDto);
+    return plainToInstance(CommentResponseDto, result);
   }
 
   @Put(':id')
@@ -55,8 +74,12 @@ export class CommentsController {
   async updateComment(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCommentDto: UpdateCommentDto,
-  ) {
-    return this.commentService.update({ id, ...updateCommentDto });
+  ): Promise<CommentResponseDto> {
+    const result = await this.commentService.update({
+      id,
+      ...updateCommentDto,
+    });
+    return plainToInstance(CommentResponseDto, result);
   }
 
   @Delete(':id')

@@ -12,6 +12,8 @@ import {
   CreateCommentDto,
   UpdateCommentDto,
   GetCommentsQueryDto,
+  CommentResponseDto,
+  CommentsResponseDto,
 } from '../dtos';
 
 describe('CommentsController', () => {
@@ -30,8 +32,8 @@ describe('CommentsController', () => {
       id: 'user-1',
       nickName: 'testuser',
     },
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
     deletedAt: null,
   };
 
@@ -75,7 +77,7 @@ describe('CommentsController', () => {
   });
 
   describe('getCommentsByPostId', () => {
-    it('포스트의 댓글 목록을 반환해야 한다', async () => {
+    it('포스트의 댓글 목록을 CommentsResponseDto로 변환하여 반환해야 한다', async () => {
       const postId = 1;
       const query: GetCommentsQueryDto = {
         take: 20,
@@ -96,12 +98,35 @@ describe('CommentsController', () => {
         postId,
         ...query,
       });
-      expect(result).toEqual(mockResponse);
+      expect(result).toBeInstanceOf(CommentsResponseDto);
+      expect(result.comments).toHaveLength(1);
+      expect(result.comments[0]).toBeInstanceOf(CommentResponseDto);
+      expect(result.totalCount).toBe(1);
+      expect(result.nextCursor).toBe(null);
+    });
+
+    it('빈 댓글 목록도 정상적으로 처리해야 한다', async () => {
+      const postId = 1;
+      const query: GetCommentsQueryDto = {};
+
+      const mockResponse = {
+        comments: [],
+        totalCount: 0,
+        nextCursor: null,
+      };
+
+      commentService.findsByPostId.mockResolvedValue(mockResponse);
+
+      const result = await controller.getCommentsByPostId(postId, query);
+
+      expect(result).toBeInstanceOf(CommentsResponseDto);
+      expect(result.comments).toEqual([]);
+      expect(result.totalCount).toBe(0);
     });
   });
 
   describe('getComment', () => {
-    it('특정 댓글을 반환해야 한다', async () => {
+    it('특정 댓글을 CommentResponseDto로 변환하여 반환해야 한다', async () => {
       const commentId = 1;
 
       commentService.find.mockResolvedValue(mockComment);
@@ -109,12 +134,15 @@ describe('CommentsController', () => {
       const result = await controller.getComment(commentId);
 
       expect(commentService.find).toHaveBeenCalledWith(commentId);
-      expect(result).toEqual(mockComment);
+      expect(result).toBeInstanceOf(CommentResponseDto);
+      expect(result.id).toBe(mockComment.id);
+      expect(result.content).toBe(mockComment.content);
+      expect(result.author).toEqual(mockComment.author);
     });
   });
 
   describe('createComment', () => {
-    it('새로운 댓글을 생성해야 한다', async () => {
+    it('새로운 댓글을 생성하고 CommentResponseDto로 변환하여 반환해야 한다', async () => {
       const createCommentDto: CreateCommentDto = {
         content: '새로운 댓글입니다',
         postId: 1,
@@ -126,12 +154,14 @@ describe('CommentsController', () => {
       const result = await controller.createComment(createCommentDto);
 
       expect(commentService.create).toHaveBeenCalledWith(createCommentDto);
-      expect(result).toEqual(mockComment);
+      expect(result).toBeInstanceOf(CommentResponseDto);
+      expect(result.content).toBe(mockComment.content);
+      expect(result.postId).toBe(mockComment.postId);
     });
   });
 
   describe('updateComment', () => {
-    it('댓글을 수정해야 한다', async () => {
+    it('댓글을 수정하고 CommentResponseDto로 변환하여 반환해야 한다', async () => {
       const commentId = 1;
       const updateCommentDto: UpdateCommentDto = {
         content: '수정된 댓글입니다',
@@ -149,7 +179,8 @@ describe('CommentsController', () => {
         id: commentId,
         ...updateCommentDto,
       });
-      expect(result).toEqual(updatedComment);
+      expect(result).toBeInstanceOf(CommentResponseDto);
+      expect(result.content).toBe('수정된 댓글입니다');
     });
   });
 
@@ -163,6 +194,40 @@ describe('CommentsController', () => {
       await controller.deleteComment(commentId);
 
       expect(commentService.delete).toHaveBeenCalledWith(commentId);
+    });
+  });
+
+  describe('DTO 변환 테스트', () => {
+    it('CommentResponseDto가 올바른 속성을 가져야 한다', () => {
+      const dto = new CommentResponseDto();
+      dto.id = 1;
+      dto.content = 'Test Comment';
+      dto.postId = 1;
+      dto.authorId = 'user-1';
+      dto.createdAt = new Date();
+      dto.updatedAt = new Date();
+      dto.deletedAt = null;
+      dto.author = { id: 'user-1', nickName: 'test' };
+
+      expect(dto).toHaveProperty('id');
+      expect(dto).toHaveProperty('content');
+      expect(dto).toHaveProperty('postId');
+      expect(dto).toHaveProperty('authorId');
+      expect(dto).toHaveProperty('createdAt');
+      expect(dto).toHaveProperty('updatedAt');
+      expect(dto).toHaveProperty('deletedAt');
+      expect(dto).toHaveProperty('author');
+    });
+
+    it('CommentsResponseDto가 올바른 구조를 가져야 한다', () => {
+      const dto = new CommentsResponseDto();
+      dto.comments = [];
+      dto.totalCount = 0;
+      dto.nextCursor = null;
+
+      expect(dto).toHaveProperty('comments');
+      expect(dto).toHaveProperty('totalCount');
+      expect(dto).toHaveProperty('nextCursor');
     });
   });
 });

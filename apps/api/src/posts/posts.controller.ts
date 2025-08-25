@@ -14,9 +14,19 @@ import {
 } from '@nestjs/common';
 
 import { PostService } from '@libs/business';
-import { AuthorOwnershipGuard } from '@libs/utils';
+import {
+  AuthorOwnershipGuard,
+  plainToInstance,
+  plainArrayToInstance,
+} from '@libs/utils';
 
-import { CreatePostDto, UpdatePostDto, GetPostsQueryDto } from './dtos';
+import {
+  CreatePostDto,
+  UpdatePostDto,
+  GetPostsQueryDto,
+  PostResponseDto,
+  PostsResponseDto,
+} from './dtos';
 import { AccessTokenGuard } from '../auth/guards';
 
 @Controller('posts')
@@ -24,20 +34,33 @@ export class PostsController {
   constructor(private readonly postService: PostService) {}
 
   @Get()
-  async getPosts(@Query() query: GetPostsQueryDto) {
-    return this.postService.finds(query);
+  async getPosts(@Query() query: GetPostsQueryDto): Promise<PostsResponseDto> {
+    const result = await this.postService.finds(query);
+    const response = plainToInstance(PostsResponseDto, {
+      ...result,
+      posts: plainArrayToInstance(PostResponseDto, result.posts),
+    });
+    // Ensure null values are preserved
+    response.nextCursor = result.nextCursor;
+    return response;
   }
 
   @Get(':id')
-  async getPost(@Param('id', ParseIntPipe) id: number) {
-    return this.postService.find(id);
+  async getPost(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<PostResponseDto> {
+    const result = await this.postService.find(id);
+    return plainToInstance(PostResponseDto, result);
   }
 
   @Post()
   @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.CREATED)
-  async createPost(@Body() createPostDto: CreatePostDto) {
-    return this.postService.create(createPostDto);
+  async createPost(
+    @Body() createPostDto: CreatePostDto,
+  ): Promise<PostResponseDto> {
+    const result = await this.postService.create(createPostDto);
+    return plainToInstance(PostResponseDto, result);
   }
 
   @Put(':id')
@@ -45,8 +68,9 @@ export class PostsController {
   async updatePost(
     @Param('id', ParseIntPipe) id: number,
     @Body() updatePostDto: UpdatePostDto,
-  ) {
-    return this.postService.update({ id, ...updatePostDto });
+  ): Promise<PostResponseDto> {
+    const result = await this.postService.update({ id, ...updatePostDto });
+    return plainToInstance(PostResponseDto, result);
   }
 
   @Delete(':id')

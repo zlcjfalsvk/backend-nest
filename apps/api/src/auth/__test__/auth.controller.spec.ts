@@ -6,7 +6,12 @@ import { AuthService } from '@libs/business';
 import { CustomError, ERROR_CODES } from '@libs/utils';
 
 import { AuthController } from '../auth.controller';
-import { SignInDto, SignUpDto } from '../dtos';
+import {
+  SignInDto,
+  SignUpDto,
+  SignUpResponseDto,
+  SignInResponseDto,
+} from '../dtos';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -32,7 +37,7 @@ describe('AuthController', () => {
   });
 
   describe('signUp', () => {
-    it('유효한 정보로 회원가입하면 새로운 사용자 정보를 반환한다', async () => {
+    it('유효한 정보로 회원가입하면 SignUpResponseDto로 변환하여 반환한다', async () => {
       // Arrange
       const signUpDto: SignUpDto = {
         email: 'test@example.com',
@@ -46,8 +51,8 @@ describe('AuthController', () => {
         email: 'test@example.com',
         nickName: 'testuser',
         introduction: 'Hello, I am a test user',
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
       };
 
       authService.signUp.mockResolvedValue(expectedResult);
@@ -57,7 +62,10 @@ describe('AuthController', () => {
 
       // Assert
       expect(authService.signUp).toHaveBeenCalledWith(signUpDto);
-      expect(result).toEqual(expectedResult);
+      expect(result).toBeInstanceOf(SignUpResponseDto);
+      expect(result.id).toBe(expectedResult.id);
+      expect(result.email).toBe(expectedResult.email);
+      expect(result.nickName).toBe(expectedResult.nickName);
     });
 
     it('이미 존재하는 이메일로 회원가입하면 중복 오류가 발생한다', async () => {
@@ -124,7 +132,7 @@ describe('AuthController', () => {
   });
 
   describe('signIn', () => {
-    it('올바른 이메일과 비밀번호로 로그인하면 인증 토큰을 반환한다', async () => {
+    it('올바른 이메일과 비밀번호로 로그인하면 SignInResponseDto로 변환하여 반환한다', async () => {
       // Arrange
       const signInDto: SignInDto = {
         email: 'test@example.com',
@@ -144,7 +152,10 @@ describe('AuthController', () => {
 
       // Assert
       expect(authService.signIn).toHaveBeenCalledWith(signInDto);
-      expect(result).toEqual(expectedResult);
+      expect(result).toBeInstanceOf(SignInResponseDto);
+      expect(result.id).toBe(expectedResult.id);
+      expect(result.accessToken).toBe(expectedResult.accessToken);
+      expect(result.refreshToken).toBe(expectedResult.refreshToken);
     });
 
     it('잘못된 이메일 또는 비밀번호로 로그인하면 인증 실패 오류가 발생한다', async () => {
@@ -163,6 +174,36 @@ describe('AuthController', () => {
       // Act & Assert
       await expect(controller.signIn(signInDto)).rejects.toThrow(error);
       expect(authService.signIn).toHaveBeenCalledWith(signInDto);
+    });
+  });
+
+  describe('DTO 변환 테스트', () => {
+    it('SignUpResponseDto가 올바른 속성을 가져야 한다', () => {
+      const dto = new SignUpResponseDto();
+      dto.id = 'user-id';
+      dto.email = 'test@example.com';
+      dto.nickName = 'testuser';
+      dto.introduction = 'Hello';
+      dto.createdAt = new Date();
+      dto.updatedAt = new Date();
+
+      expect(dto).toHaveProperty('id');
+      expect(dto).toHaveProperty('email');
+      expect(dto).toHaveProperty('nickName');
+      expect(dto).toHaveProperty('introduction');
+      expect(dto).toHaveProperty('createdAt');
+      expect(dto).toHaveProperty('updatedAt');
+    });
+
+    it('SignInResponseDto가 올바른 속성을 가져야 한다', () => {
+      const dto = new SignInResponseDto();
+      dto.id = 'user-id';
+      dto.accessToken = 'access-token';
+      dto.refreshToken = 'refresh-token';
+
+      expect(dto).toHaveProperty('id');
+      expect(dto).toHaveProperty('accessToken');
+      expect(dto).toHaveProperty('refreshToken');
     });
   });
 });

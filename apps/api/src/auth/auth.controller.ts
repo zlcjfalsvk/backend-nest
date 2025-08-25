@@ -1,6 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
 
 import { AuthService } from '@libs/business';
+import { plainToInstance } from '@libs/utils';
 
 import {
   SignInDto,
@@ -15,11 +16,13 @@ export class AuthController {
 
   @Post('/sign-up')
   async signUp(@Body() signUpDto: SignUpDto): Promise<SignUpResponseDto> {
-    return this.authService.signUp(signUpDto);
+    const result = await this.authService.signUp(signUpDto);
+    return plainToInstance(SignUpResponseDto, result);
   }
 
   @Post('/sign-in')
   async signIn(@Body() signInDto: SignInDto): Promise<SignInResponseDto> {
-    return this.authService.signIn(signInDto);
+    const result = await this.authService.signIn(signInDto);
+    return plainToInstance(SignInResponseDto, result);
   }
 }
