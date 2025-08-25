@@ -75,7 +75,7 @@ class TypeCaster {
     if (typeof value === 'string') {
       return value;
     }
-    return String(value);
+    return String(JSON.stringify(value));
   }
 
   static toNumber(value: unknown): number {
@@ -220,11 +220,7 @@ class MappingManager {
 // ==================== 값 변환 처리 ====================
 
 class ValueProcessor {
-  static processValue(
-    value: any,
-    schemaInfo: SchemaInfo,
-    mappingOptions?: MappingOptions<any>,
-  ): any {
+  static processValue(value: any, schemaInfo: SchemaInfo): any {
     switch (schemaInfo.type) {
       case 'string':
         return TypeCaster.toString(value);
@@ -458,7 +454,6 @@ const plainToInstance = <T extends object, P = unknown>(
     schema,
     processor,
     processedInstanceKeys,
-    mappingOptions,
   );
 
   // Computed 필드 처리
@@ -468,7 +463,6 @@ const plainToInstance = <T extends object, P = unknown>(
     schema,
     processor,
     processedInstanceKeys,
-    mappingOptions,
   );
 
   // 처리되지 않은 필드에 defaultValue 적용
@@ -498,7 +492,6 @@ function processJsonKeys<T extends object>(
   schema: Map<string, SchemaInfo>,
   processor: MappingProcessor,
   processedInstanceKeys: Set<string>,
-  mappingOptions?: MappingOptions<T>,
 ): void {
   for (const jsonKey of Object.keys(plainObject)) {
     const instanceKey = processor.mapJsonKeyToInstanceKey(jsonKey);
@@ -526,11 +519,7 @@ function processJsonKeys<T extends object>(
 
     if (!TypeGuards.isNullOrUndefined(value)) {
       processedInstanceKeys.add(instanceKey);
-      const processedValue = ValueProcessor.processValue(
-        value,
-        schemaInfo,
-        mappingOptions,
-      );
+      const processedValue = ValueProcessor.processValue(value, schemaInfo);
 
       // processValue가 undefined를 반환하지 않은 경우에만 할당
       if (processedValue !== undefined) {
@@ -546,7 +535,6 @@ function processComputedFields<T extends object>(
   schema: Map<string, SchemaInfo>,
   processor: MappingProcessor,
   processedInstanceKeys: Set<string>,
-  mappingOptions?: MappingOptions<T>,
 ): void {
   const computedFields = processor.getComputedFields();
 
@@ -570,7 +558,6 @@ function processComputedFields<T extends object>(
       (instance as any)[instanceKey] = ValueProcessor.processValue(
         value,
         schemaInfo,
-        mappingOptions,
       );
     }
   }
