@@ -51,6 +51,34 @@ Git 변경사항에 대해 코드 정리(Prettier, ESLint) 후 커밋합니다.
 
 - `/commit-push` - 포맷팅, 린팅, 커밋, 푸시를 한 번에 실행
 
+### /refactoring [경로]
+
+지정된 경로의 코드를 분석하고 리팩토링합니다.
+
+- 코드 품질 및 유지보수성 개선
+- 프로젝트 패턴 및 문서 참조하여 일관성 유지
+- 리팩토링 계획 제안 후 승인 받아 진행
+- 변경 후 Prettier, ESLint, TypeScript 검사 실행
+
+**사용법:**
+
+- `/refactoring` - 전체 프로젝트 분석
+- `/refactoring libs/business/src/auth` - 특정 디렉토리 리팩토링
+- `/refactoring apps/api/src/posts/posts.controller.ts` - 특정 파일 리팩토링
+
+### /sync-docs
+
+모든 마크다운 문서를 현재 코드베이스와 동기화합니다.
+
+- `**/*.md` 파일 스캔 (`.claude/` 포함)
+- 코드베이스 변경사항 분석
+- 문서 내용 업데이트 (API, 서비스, 타입 등)
+- 변경 요약 리포트 제공
+
+**사용법:**
+
+- `/sync-docs` - 모든 문서 동기화
+
 ---
 
 ## 프로젝트 문서
