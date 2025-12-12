@@ -29,6 +29,7 @@ libs/business/src/
 ├── comment/
 │   ├── comment.service.ts    # Comment management logic
 │   ├── comment.module.ts     # Comment module configuration
+│   ├── comment.helpers.ts    # Comment utility/validation functions
 │   ├── types.ts              # Comment-related types
 │   └── index.ts              # Public exports
 └── index.ts                  # Main business layer exports
@@ -50,10 +51,8 @@ libs/business/src/
 
 **Key Methods**:
 
-- `signUp(data)`: Register new user
-- `signIn(credentials)`: Authenticate user
-- `validateToken(token)`: Verify JWT token
-- `refreshToken(refreshToken)`: Generate new access token
+- `signUp(param)`: Register new user with email, password, nickName
+- `signIn(param)`: Authenticate user and return tokens
 
 ### Post Service
 
@@ -68,11 +67,21 @@ libs/business/src/
 
 **Key Methods**:
 
-- `createPost(userId, data)`: Create new post
-- `getPost(id)`: Retrieve single post
-- `getPosts(query)`: List posts with filters
-- `updatePost(id, userId, data)`: Update existing post
-- `deletePost(id, userId)`: Delete post
+- `create(data)`: Create new post with title, content, slug, authorId
+- `find(id)`: Retrieve single post by ID (increments view count)
+- `finds(params)`: List posts with pagination and cursor-based navigation
+- `update(params)`: Update existing post
+- `delete(id)`: Soft delete post
+
+**Helper Functions** (`post.helpers.ts`):
+
+- `AUTHOR_INCLUDE`: Constant for author include configuration
+- `buildWhereCondition()`: Build query where conditions
+- `buildFindManyQueryOptions()`: Build findMany query options
+- `calculateTotalPages()`: Calculate pagination total pages
+- `validatePostExists()`: Validate post exists (throws if not)
+- `validatePostNotDeleted()`: Validate post is not deleted
+- `validateSlugUniqueness()`: Validate slug is unique
 
 ### Comment Service
 
@@ -87,11 +96,20 @@ libs/business/src/
 
 **Key Methods**:
 
-- `createComment(userId, postId, data)`: Create new comment
-- `getComment(id)`: Retrieve single comment
-- `getComments(query)`: List comments with filters
-- `updateComment(id, userId, data)`: Update existing comment
-- `deleteComment(id, userId)`: Delete comment
+- `create(data)`: Create new comment with content, postId, authorId
+- `find(id)`: Retrieve single comment by ID
+- `findsByPostId(params)`: List comments for a post with pagination
+- `update(params)`: Update existing comment
+- `delete(id)`: Soft delete comment
+
+**Helper Functions** (`comment.helpers.ts`):
+
+- `AUTHOR_INCLUDE`: Constant for author include configuration
+- `validatePostExists()`: Validate post exists for comment
+- `validatePostNotDeleted()`: Validate post is not deleted
+- `validateCommentExists()`: Validate comment exists (throws if not)
+- `validateCommentNotDeleted()`: Validate comment is not deleted
+- `validateCommentNotAlreadyDeleted()`: Validate comment is not already deleted
 
 ## Type Definitions
 
@@ -169,7 +187,7 @@ const postRouter = t.router({
 
 - `@nestjs/common`: Dependency injection and decorators
 - `@nestjs/jwt`: JWT token handling
-- `bcrypt`: Password hashing
+- `argon2`: Password hashing (Note: For Korean services, pbkdf2-sha256 should be used per KISA standards)
 
 ## Module Registration
 

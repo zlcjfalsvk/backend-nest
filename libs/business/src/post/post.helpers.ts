@@ -5,6 +5,20 @@ import { CustomError, ERROR_CODES } from '@libs/utils';
 import { FindsParams } from './types';
 
 /**
+ * Author include 설정 상수
+ */
+export const AUTHOR_SELECT = {
+  id: true,
+  nickName: true,
+} as const;
+
+export const AUTHOR_INCLUDE = {
+  author: {
+    select: AUTHOR_SELECT,
+  },
+} as const;
+
+/**
  * 게시물 쿼리를 위한 where 조건을 생성합니다
  */
 export const buildWhereCondition = (

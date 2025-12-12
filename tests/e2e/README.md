@@ -42,6 +42,7 @@ scripts/
 ## NPM 스크립트
 
 ### API E2E 테스트
+
 ```bash
 # API E2E 테스트만 실행
 npm run e2e:api
@@ -53,6 +54,7 @@ npm run e2e:api:teardown   # API 환경 정리
 ```
 
 ### tRPC E2E 테스트
+
 ```bash
 # tRPC E2E 테스트만 실행
 npm run e2e:trpc
@@ -64,6 +66,7 @@ npm run e2e:trpc:teardown  # tRPC 환경 정리
 ```
 
 ### 통합 E2E 테스트
+
 ```bash
 # 모든 E2E 테스트 실행 (API + tRPC) - 순차 실행
 npm run e2e
@@ -92,21 +95,25 @@ npm run e2e:full
 ## 사용 시나리오
 
 ### API 개발 중
+
 ```bash
 npm run e2e:api
 ```
 
 ### tRPC 개발 중
+
 ```bash
 npm run e2e:trpc
 ```
 
 ### 전체 통합 테스트
+
 ```bash
 npm run e2e
 ```
 
 ### CI/CD에서 병렬 실행
+
 ```yaml
 # GitHub Actions 예시
 jobs:
@@ -114,7 +121,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: npm run e2e:api
-  
+
   trpc-e2e:
     runs-on: ubuntu-latest
     steps:

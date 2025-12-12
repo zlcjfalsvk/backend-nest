@@ -4,10 +4,12 @@
 [![E2E Tests](https://github.com/zlcjfalsvk/be-layered-example/actions/workflows/e2e-tests.yml/badge.svg)](https://github.com/zlcjfalsvk/be-layered-example/actions/workflows/e2e-tests.yml)
 
 ## 🔧 Requirements
+
 - Node.js >= 22.0.0
 - npm >= 10.0.0
 
 ## 🚀 Skill Set
+
 - nestjs
 - PostgreSQL
 - Prisma ORM
@@ -36,12 +38,14 @@ be-layered-example/
 이 프로젝트는 포괄적인 테스트 전략을 구현하고 있습니다:
 
 ### Unit Tests
+
 - **Framework**: Vitest
 - **Coverage**: 비즈니스 로직, 서비스, 가드, 필터 등
 - **Command**: `npm run test:unit`
 - **Status**: ![Unit Tests](https://github.com/zlcjfalsvk/be-layered-example/actions/workflows/run-tests.yml/badge.svg)
 
 ### E2E Tests
+
 - **Applications**: API (REST) & tRPC 서버
 - **Database**: PostgreSQL with Prisma ORM
 - **Test Environment**: Docker containers
@@ -49,12 +53,14 @@ be-layered-example/
 - **Status**: ![E2E Tests](https://github.com/zlcjfalsvk/be-layered-example/actions/workflows/e2e-tests.yml/badge.svg)
 
 ### CI/CD Pipeline
+
 - **Unit Tests**: 모든 브랜치에서 push 시 실행
 - **E2E Tests**: main/develop 브랜치와 PR에서 실행
 - **Matrix Testing**: API와 tRPC 애플리케이션 병렬 테스트
 - **Test Results**: GitHub Actions Summary에서 상세 결과 확인 가능
 
 ### 로컬 테스트 실행
+
 ```bash
 # Unit Tests
 npm run test:unit
@@ -64,7 +70,7 @@ npm run test:unit:coverage # Coverage report
 # E2E Tests - API
 npm run e2e:api:test
 
-# E2E Tests - tRPC  
+# E2E Tests - tRPC
 npm run e2e:trpc:test
 
 # 모든 E2E Tests
@@ -72,10 +78,10 @@ npm run e2e:test
 ```
 
 ### 테스트 결과 확인
+
 - **Live Results**: 각 워크플로우 배지를 클릭하여 최신 실행 결과 확인
 - **Action History**: GitHub Actions 탭에서 전체 실행 기록 조회
 - **Detailed Logs**: 실패한 테스트의 경우 artifacts에서 상세 로그 다운로드 가능
-
 
 ## ⚠️ Issues
 

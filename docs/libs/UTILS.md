@@ -30,32 +30,46 @@ libs/utils/src/
 
 ## Key Components
 
-### HTTP Exception Filter
+### HTTP Filter (CustomError Handler)
 
 **Location**: `libs/utils/src/filters/http.filter.ts`
 
 **Responsibilities**:
 
-- Catch all HTTP exceptions globally
+- Catch `CustomError` exceptions globally
+- Map error codes to appropriate HTTP status codes
 - Format error responses consistently
-- Log errors for debugging
-- Transform exceptions to user-friendly messages
+- Add error code to response body
 
 **Features**:
 
 - Implements `ExceptionFilter` interface
-- Catches `HttpException` and all subclasses
-- Returns standardized error format
+- Catches `CustomError` class specifically
+- Maps error codes to HTTP exceptions (404, 401, 409, etc.)
+- Returns standardized error format with error code
+
+**Error Code Mapping**:
+
+| Error Code              | HTTP Status      |
+| ----------------------- | ---------------- |
+| AUTH_CONFLICT           | 409 Conflict     |
+| AUTH_UNAUTHORIZED       | 401 Unauthorized |
+| POST_NOT_FOUND          | 404 Not Found    |
+| COMMENT_NOT_FOUND       | 404 Not Found    |
+| POST_DELETED            | 404 Not Found    |
+| COMMENT_DELETED         | 404 Not Found    |
+| COMMENT_ALREADY_DELETED | 404 Not Found    |
+| (default)               | 400 Bad Request  |
 
 **Usage Example**:
 
 ```typescript
 // Register globally in main.ts
-import { HttpExceptionFilter } from '@libs/utils';
+import { HttpFilter } from '@libs/utils';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalFilters(new HttpFilter());
   await app.listen(3000);
 }
 ```
@@ -65,10 +79,9 @@ async function bootstrap() {
 ```typescript
 {
   statusCode: number;
-  timestamp: string;
-  path: string;
-  message: string | string[];
-  error?: string;
+  message: string;
+  error: string;
+  code: string; // CustomError code (e.g., 'POST_NOT_FOUND')
 }
 ```
 
@@ -107,48 +120,25 @@ export class PostsController {
 
 **Available Decorators**:
 
-#### @CurrentUser()
+#### @IsStrongPassword()
 
-Extract authenticated user from request:
+Custom validator decorator for password strength validation:
 
 ```typescript
-import { CurrentUser } from '@libs/utils';
+import { IsStrongPassword } from '@libs/utils';
 
-@Get('profile')
-async getProfile(@CurrentUser() user: User) {
-  return user;
+export class SignUpDto {
+  @IsStrongPassword()
+  password: string;
 }
 ```
 
-#### @CurrentUserId()
+**Password Requirements**:
 
-Extract just the user ID:
-
-```typescript
-import { CurrentUserId } from '@libs/utils';
-
-@Post()
-async createPost(
-  @CurrentUserId() userId: string,
-  @Body() createDto: CreatePostDto,
-) {
-  return await this.postService.createPost(userId, createDto);
-}
-```
-
-#### @Public()
-
-Mark endpoint as public (skip authentication):
-
-```typescript
-import { Public } from '@libs/utils';
-
-@Public()
-@Get('health')
-healthCheck() {
-  return { status: 'ok' };
-}
-```
+- At least 10 characters long
+- At least one uppercase letter (A-Z)
+- At least one lowercase letter (a-z)
+- At least one special character (!@#$%^&\*\_)
 
 ### Plain to Instance Utility
 
@@ -185,34 +175,46 @@ const dtos = plainToInstance(CreatePostDto, arrayOfPlainObjects);
 
 **Location**: `libs/utils/src/custom-error.ts`
 
-**Available Error Classes**:
+**Error Codes**:
 
 ```typescript
-// Resource not found
-export class NotFoundException extends HttpException {
-  constructor(resource: string, id: string) {
-    super(`${resource} with id ${id} not found`, HttpStatus.NOT_FOUND);
-  }
-}
+const AUTH_ERROR_CODES = {
+  AUTH_CONFLICT: 'AUTH_CONFLICT',
+  AUTH_UNAUTHORIZED: 'AUTH_UNAUTHORIZED',
+} as const;
 
-// Unauthorized access
-export class UnauthorizedException extends HttpException {
-  constructor(message = 'Unauthorized') {
-    super(message, HttpStatus.UNAUTHORIZED);
-  }
-}
+const POST_ERROR_CODES = {
+  POST_NOT_FOUND: 'POST_NOT_FOUND',
+  POST_CONFLICT: 'POST_CONFLICT',
+  POST_DELETED: 'POST_DELETED',
+} as const;
 
-// Forbidden action
-export class ForbiddenException extends HttpException {
-  constructor(message = 'Forbidden') {
-    super(message, HttpStatus.FORBIDDEN);
-  }
-}
+const COMMENT_ERROR_CODES = {
+  COMMENT_NOT_FOUND: 'COMMENT_NOT_FOUND',
+  COMMENT_DELETED: 'COMMENT_DELETED',
+  COMMENT_ALREADY_DELETED: 'COMMENT_ALREADY_DELETED',
+} as const;
 
-// Bad request
-export class BadRequestException extends HttpException {
-  constructor(message: string) {
-    super(message, HttpStatus.BAD_REQUEST);
+export const ERROR_CODES = {
+  ...AUTH_ERROR_CODES,
+  ...POST_ERROR_CODES,
+  ...COMMENT_ERROR_CODES,
+} as const;
+```
+
+**CustomError Class**:
+
+```typescript
+export class CustomError extends Error {
+  readonly #code: ErrorCodeType;
+  constructor(code: ErrorCodeType, message?: string) {
+    super(message ?? '');
+    this.name = 'CustomError';
+    this.#code = code;
+  }
+
+  get code() {
+    return this.#code;
   }
 }
 ```
@@ -220,13 +222,16 @@ export class BadRequestException extends HttpException {
 **Usage Example**:
 
 ```typescript
-import { NotFoundException } from '@libs/utils';
+import { CustomError, ERROR_CODES } from '@libs/utils';
 
-async getPost(id: string) {
+async getPost(id: number) {
   const post = await this.prisma.post.findUnique({ where: { id } });
 
   if (!post) {
-    throw new NotFoundException('Post', id);
+    throw new CustomError(
+      ERROR_CODES.POST_NOT_FOUND,
+      `Post with id ${id} not found`,
+    );
   }
 
   return post;
@@ -239,29 +244,19 @@ async getPost(id: string) {
 
 ```typescript
 // Convert snake_case to camelCase
-export function snakeToCamel(str: string): string;
+export const snakeToCamel = (snakeStr: string): string;
 
 // Convert camelCase to snake_case
-export function camelToSnake(str: string): string;
-
-// Convert object keys from snake_case to camelCase
-export function keysSnakeToCamel<T>(obj: any): T;
-
-// Convert object keys from camelCase to snake_case
-export function keysCamelToSnake<T>(obj: any): T;
+export const camelToSnake = (camelStr: string): string;
 ```
 
 **Usage Example**:
 
 ```typescript
-import { snakeToCamel, keysSnakeToCamel } from '@libs/utils';
+import { snakeToCamel, camelToSnake } from '@libs/utils';
 
 const camelCase = snakeToCamel('user_name'); // 'userName'
-
-const transformed = keysSnakeToCamel({
-  user_id: 1,
-  first_name: 'John',
-}); // { userId: 1, firstName: 'John' }
+const snakeCase = camelToSnake('userName'); // 'user_name'
 ```
 
 ## Usage Examples
@@ -269,35 +264,18 @@ const transformed = keysSnakeToCamel({
 ### Complete Request Flow with Utils
 
 ```typescript
-import {
-  HttpExceptionFilter,
-  AuthorOwnershipGuard,
-  CurrentUserId,
-  NotFoundException,
-  plainToInstance,
-} from '@libs/utils';
+import { AuthorOwnershipGuard, plainToInstance } from '@libs/utils';
 
 @Controller('posts')
-@UseFilters(HttpExceptionFilter)
 export class PostsController {
   @Put(':id')
   @UseGuards(AccessTokenGuard, AuthorOwnershipGuard)
   async updatePost(
-    @Param('id') id: string,
-    @CurrentUserId() userId: string,
-    @Body() body: any,
-  ) {
-    // Transform plain object to DTO
-    const updateDto = plainToInstance(UpdatePostDto, body);
-
-    // Get post
-    const post = await this.postService.getPost(id);
-    if (!post) {
-      throw new NotFoundException('Post', id);
-    }
-
-    // Update post
-    return await this.postService.updatePost(id, userId, updateDto);
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updatePostDto: UpdatePostDto,
+  ): Promise<PostResponseDto> {
+    const result = await this.postService.update({ id, ...updatePostDto });
+    return plainToInstance(PostResponseDto, result);
   }
 }
 ```
@@ -307,14 +285,14 @@ export class PostsController {
 Utils don't typically need module registration, but filters and guards should be registered:
 
 ```typescript
-// Global registration
-import { HttpExceptionFilter } from '@libs/utils';
+// Global registration in main.ts
+import { HttpFilter } from '@libs/utils';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Global exception filter
-  app.useGlobalFilters(new HttpExceptionFilter());
+  // Global exception filter for CustomError
+  app.useGlobalFilters(new HttpFilter());
 
   // Global validation pipe
   app.useGlobalPipes(
@@ -368,16 +346,17 @@ describe('AuthorOwnershipGuard', () => {
 ### Testing Decorators
 
 ```typescript
-describe('CurrentUser decorator', () => {
-  it('should extract user from request', () => {
-    const request = {
-      user: { id: 'user-1', email: 'test@example.com' },
-    };
+describe('IsStrongPassword decorator', () => {
+  it('should validate strong password', () => {
+    const validPassword = 'MyStr0ng!Pass';
+    // Password meets all requirements
+    expect(isValidStrongPassword(validPassword)).toBe(true);
+  });
 
-    const user = CurrentUser(null, {
-      switchToHttp: () => ({ getRequest: () => request }),
-    });
-    expect(user).toEqual(request.user);
+  it('should reject weak password', () => {
+    const weakPassword = 'weak';
+    // Missing uppercase, special char, and too short
+    expect(isValidStrongPassword(weakPassword)).toBe(false);
   });
 });
 ```

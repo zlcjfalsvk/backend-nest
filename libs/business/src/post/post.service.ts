@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@libs/infrastructure';
 
 import {
+  AUTHOR_INCLUDE,
   buildWhereCondition,
   buildFindManyQueryOptions,
   calculateTotalPages,
@@ -54,14 +55,7 @@ export class PostService {
   async find(id: number): Promise<FindResponse> {
     const post = await this.prismaService.post.findUnique({
       where: { id },
-      include: {
-        author: {
-          select: {
-            id: true,
-            nickName: true,
-          },
-        },
-      },
+      include: AUTHOR_INCLUDE,
     });
 
     validatePostExists(post, id);
@@ -85,17 +79,9 @@ export class PostService {
 
     validateSlugUniqueness(existingPost, data.slug);
 
-    // Create post
     return this.prismaService.post.create({
       data,
-      include: {
-        author: {
-          select: {
-            id: true,
-            nickName: true,
-          },
-        },
-      },
+      include: AUTHOR_INCLUDE,
     });
   }
 
@@ -123,14 +109,7 @@ export class PostService {
     return this.prismaService.post.update({
       where: { id },
       data,
-      include: {
-        author: {
-          select: {
-            id: true,
-            nickName: true,
-          },
-        },
-      },
+      include: AUTHOR_INCLUDE,
     });
   }
 

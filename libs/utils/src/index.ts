@@ -1,5 +1,5 @@
 export * from './custom-error';
-export * from './docorators';
+export * from './decorators';
 export * from './filters';
 export * from './guards';
 export * from './plain-to-instance';

@@ -35,6 +35,7 @@ export class HttpFilter implements ExceptionFilter {
         httpException = new NotFoundException(exception.message || 'Not Found');
         break;
       case ERROR_CODES.COMMENT_DELETED:
+      case ERROR_CODES.COMMENT_ALREADY_DELETED:
       case ERROR_CODES.POST_DELETED:
         httpException = new NotFoundException(exception.message || 'Not Found');
         break;
